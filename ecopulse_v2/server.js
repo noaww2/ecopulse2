@@ -52,7 +52,7 @@ function toArticle(item, feed) {
   const title = cleanText(item.title || "");
   const description = cleanText(item.contentSnippet || item.summary || item.content || "");
   const haystack = `${title} ${description}`.toLocaleLowerCase("fr");
-  if (!title || !TERMS.some(term => haystack.includes(term))) return null;
+  if (!title || (feed.category !== "Sport" && !TERMS.some(term => haystack.includes(term)))) return null;
 
   const rawDate = item.isoDate || item.pubDate || null;
   const publishedAt = rawDate && !Number.isNaN(Date.parse(rawDate))
