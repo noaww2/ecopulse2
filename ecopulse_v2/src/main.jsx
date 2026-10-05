@@ -191,11 +191,140 @@ function AgencyPage() {
       <section className="agency-section" id="services"><div className="agency-wrap"><p className="agency-eyebrow">CE QUE JE FAIS</p><h2>Simple pour vous.<br/>Puissant pour vos clients.</h2><div className="agency-services"><article><b>01</b><h3>Création</h3><p>Un site pensé autour de votre activité, de vos clients et de votre image.</p></article><article><b>02</b><h3>Conversion</h3><p>Des appels à l’action clairs, des formulaires et des parcours qui donnent envie de passer à l’action.</p></article><article><b>03</b><h3>Visibilité</h3><p>Structure SEO locale, performance mobile et fondations techniques propres.</p></article></div></div></section>
       <section className="agency-section agency-dark" id="portfolio"><div className="agency-wrap"><p className="agency-eyebrow">PORTFOLIO</p><h2>Des démos prêtes à<br/>devenir vos prochains projets.</h2><div className="agency-projects"><a href="/" className="agency-project"><span>01 · MÉDIA</span><strong>ÉcoPulse</strong><small>Actualité économique & sportive</small><ArrowUpRight size={18}/></a><div className="agency-project"><span>02 · FITNESS</span><strong>Iron House</strong><small>Concept de site pour salle de sport</small><ArrowUpRight size={18}/></div><div className="agency-project"><span>03 · BEAUTÉ</span><strong>Studio 13</strong><small>Concept de site pour professionnel local</small><ArrowUpRight size={18}/></div></div></div></section>
       <section className="agency-section" id="tarifs"><div className="agency-wrap"><p className="agency-eyebrow">OFFRES</p><h2>Un prix clair.<br/>Pas de mauvaise surprise.</h2><div className="agency-pricing">{offers.map((o,i)=><article className={i===1?"agency-price featured":"agency-price"} key={o.name}>{i===1&&<span className="agency-badge">LE PLUS CHOISI</span>}<p>{o.name}</p><strong>{o.price}</strong><span>à partir de</span><h3>{o.text}</h3><ul>{o.items.map(x=><li key={x}>✓ {x}</li>)}</ul><a href="#contact">Choisir cette offre <ArrowRight size={14}/></a></article>)}</div><div className="agency-retainer"><div><p>MAINTENANCE</p><strong>49 €/mois</strong></div><span>Modifications, surveillance, petites améliorations et suivi du site.</span></div></div></section>
-      <section className="agency-section agency-contact" id="contact"><div className="agency-wrap agency-contact-box"><div><p className="agency-eyebrow">VOTRE PROJET</p><h2>On transforme votre idée<br/>en site cette semaine.</h2><p>Expliquez simplement votre activité. La première discussion sert à définir le besoin et le bon format.</p></div><div className="agency-contact-card"><strong>Prêt à commencer ?</strong><p>Remplacez ce bouton par votre e-mail, WhatsApp ou Calendly avant de prospecter.</p><a href="https://mail.google.com/mail/?view=cm&fs=1&to=noagilmora%40icloud.com&su=Discutons%20de%20mon%20projet%20web%20-%20NOA%20STUDIO&body=Bonjour%20Noa%2C%0A%0AJe%20souhaite%20discuter%20d%27un%20projet%20de%20site%20web%20pour%20mon%20activit%C3%A9.%0A%0AActivit%C3%A9%20%3A%0ABesoin%20%3A%0ABudget%20envisag%C3%A9%20%3A%0AD%C3%A9lai%20souhait%C3%A9%20%3A%0A%0AMerci%20%21" target="_blank" rel="noreferrer">Discuter de mon projet <ArrowRight size={15}/></a></div></div></section>
+      <section className="agency-section agency-contact" id="contact"><div className="agency-wrap agency-contact-box"><div><p className="agency-eyebrow">VOTRE PROJET</p><h2>On transforme votre idée<br/>en site cette semaine.</h2><p>Expliquez simplement votre activité. La première discussion sert à définir le besoin et le bon format.</p></div><div className="agency-contact-card"><strong>Prêt à commencer ?</strong><p>Remplacez ce bouton par votre e-mail, WhatsApp ou Calendly avant de prospecter.</p><a href="/agence/chat">Discuter de mon projet <ArrowRight size={15}/></a></div></div></section>
     </main>
     <footer className="agency-footer"><div className="agency-wrap"><strong>n. NOA STUDIO</strong><span>Sites web modernes pour entreprises ambitieuses.</span><a href="/">Voir EcoPulse</a></div></footer>
   </div>;
 }
 
+
+function ChatPage() {
+  const [conversation, setConversation] = useState(null);
+  const [form, setForm] = useState({name:"", email:""});
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function startChat(e) {
+    e.preventDefault();
+    setLoading(true); setError("");
+    try {
+      const response = await fetch("/api/chat/start", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(form)});
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Impossible de démarrer la discussion.");
+      localStorage.setItem("noaChatId", data.id);
+      setConversation(data);
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
+  }
+
+  async function loadConversation(id) {
+    const response = await fetch("/api/chat/" + id);
+    if (!response.ok) { localStorage.removeItem("noaChatId"); return; }
+    setConversation(await response.json());
+  }
+
+  useEffect(() => {
+    const id = localStorage.getItem("noaChatId");
+    if (id) loadConversation(id);
+  }, []);
+
+  useEffect(() => {
+    if (!conversation?.id) return;
+    const timer = setInterval(() => loadConversation(conversation.id), 2500);
+    return () => clearInterval(timer);
+  }, [conversation?.id]);
+
+  async function sendMessage(e) {
+    e.preventDefault();
+    const value = text.trim();
+    if (!value || !conversation) return;
+    setText("");
+    const response = await fetch("/api/chat/" + conversation.id + "/messages", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({sender:"client", text:value})
+    });
+    if (response.ok) loadConversation(conversation.id);
+  }
+
+  if (!conversation) return <div className="chat-page"><div className="chat-card chat-start-card">
+    <a className="chat-back" href="/agence">← NOA STUDIO</a>
+    <div className="chat-brand">n.</div>
+    <p className="agency-eyebrow">DISCUSSION PROJET</p>
+    <h1>Parlons de<br/><em>votre projet.</em></h1>
+    <p className="chat-intro">Laissez vos coordonnées et ouvrez directement une conversation avec NOA STUDIO.</p>
+    <form onSubmit={startChat} className="chat-form">
+      <label>Votre nom<input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Ex. Thomas Martin" required/></label>
+      <label>Votre e-mail<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="vous@email.com" required/></label>
+      <button disabled={loading}>{loading ? "Ouverture…" : "Démarrer la discussion"} <ArrowRight size={15}/></button>
+    </form>
+    {error && <p className="chat-error">{error}</p>}
+  </div></div>;
+
+  return <div className="chat-page"><div className="chat-shell">
+    <header className="chat-header"><a href="/agence" className="chat-brand-mini"><span>n.</span> NOA STUDIO</a><div><strong>{conversation.name}</strong><small>{conversation.email}</small></div><a href="/agence" className="chat-close">×</a></header>
+    <div className="chat-status"><span/> Conversation privée · Réponse de Noa</div>
+    <div className="chat-messages">{conversation.messages.length ? conversation.messages.map(message =>
+      <div key={message.id} className={"chat-message " + (message.sender === "client" ? "client" : "owner")}><div>{message.text}</div><small>{new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(new Date(message.createdAt))}</small></div>
+    ) : <div className="chat-empty">Écris ton premier message pour présenter ton projet.</div>}</div>
+    <form className="chat-composer" onSubmit={sendMessage}><input value={text} onChange={e=>setText(e.target.value)} placeholder="Écris ton message…" autoComplete="off"/><button disabled={!text.trim()} aria-label="Envoyer"><ArrowRight size={18}/></button></form>
+  </div></div>;
+}
+
+function ChatAdminPage() {
+  const [key, setKey] = useState(() => sessionStorage.getItem("noaAdminKey") || "");
+  const [authorized, setAuthorized] = useState(false);
+  const [conversations, setConversations] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [text, setText] = useState("");
+  const [error, setError] = useState("");
+
+  async function refresh() {
+    const response = await fetch("/api/chat-admin/conversations", {headers:{"x-admin-key":key}});
+    if (!response.ok) { setAuthorized(false); setError("Clé administrateur incorrecte."); return; }
+    const data = await response.json();
+    setAuthorized(true); setError(""); setConversations(data);
+    if (selected) {
+      const current = data.find(x=>x.id===selected.id);
+      if (current) setSelected(current);
+    } else if (data[0]) setSelected(data[0]);
+  }
+
+  useEffect(() => { if (key) refresh(); }, []);
+
+  useEffect(() => {
+    if (!authorized) return;
+    const timer = setInterval(refresh, 2500);
+    return () => clearInterval(timer);
+  }, [authorized, key, selected?.id]);
+
+  async function login(e) {
+    e.preventDefault();
+    sessionStorage.setItem("noaAdminKey", key);
+    await refresh();
+  }
+
+  async function reply(e) {
+    e.preventDefault();
+    if (!selected || !text.trim()) return;
+    const value = text.trim(); setText("");
+    await fetch("/api/chat/" + selected.id + "/messages", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sender:"owner",text:value})});
+    await refresh();
+  }
+
+  if (!authorized) return <div className="chat-page"><div className="chat-card chat-start-card">
+    <a className="chat-back" href="/agence">← NOA STUDIO</a><div className="chat-brand">n.</div>
+    <p className="agency-eyebrow">ESPACE NOA STUDIO</p><h1>Messages<br/><em>clients.</em></h1>
+    <form onSubmit={login} className="chat-form"><label>Clé administrateur<input type="password" value={key} onChange={e=>setKey(e.target.value)} placeholder="Votre clé" required/></label><button>Ouvrir les conversations <ArrowRight size={15}/></button></form>
+    {error && <p className="chat-error">{error}</p>}
+  </div></div>;
+
+  return <div className="chat-admin"><header><a href="/agence" className="chat-brand-mini"><span>n.</span> NOA STUDIO</a><strong>Conversations clients</strong><a href="/agence" className="chat-close">×</a></header>
+    <div className="chat-admin-grid"><aside className="chat-list">{conversations.length ? conversations.map(c=><button key={c.id} className={selected?.id===c.id?"selected":""} onClick={()=>setSelected(c)}><strong>{c.name}</strong><span>{c.email}</span><small>{c.messages.at(-1)?.text || "Nouvelle conversation"}</small></button>) : <p>Aucune conversation pour le moment.</p>}</aside>
+      <section className="chat-admin-window">{selected ? <><div className="chat-admin-title"><strong>{selected.name}</strong><span>{selected.email}</span></div><div className="chat-messages">{selected.messages.map(message=><div key={message.id} className={"chat-message " + (message.sender === "owner" ? "owner" : "client")}><div>{message.text}</div><small>{new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(new Date(message.createdAt))}</small></div>)}</div><form className="chat-composer" onSubmit={reply}><input value={text} onChange={e=>setText(e.target.value)} placeholder="Répondre au client…"/><button disabled={!text.trim()}><ArrowRight size={18}/></button></form></> : <div className="chat-empty">Sélectionne une conversation.</div>}</section>
+    </div>
+  </div>;
+}
+
 const root = createRoot(document.getElementById("root"));
-root.render(window.location.pathname === "/agence" ? <AgencyPage /> : <App />);
+root.render(window.location.pathname === "/agence" ? <AgencyPage /> : window.location.pathname === "/agence/chat" ? <ChatPage /> : window.location.pathname === "/agence/messages" ? <ChatAdminPage /> : <App />);
