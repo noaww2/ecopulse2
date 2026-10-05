@@ -31,6 +31,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const isSport = category === "Sport";
 
   async function loadNews({ quiet = false } = {}) {
@@ -96,7 +97,8 @@ function App() {
         {CATEGORIES.map(c => <button key={c} className={category === c ? "nav-link active" : "nav-link"} onClick={() => {setCategory(c);setMobileOpen(false)}}>{c === "Toutes" ? "À la une" : c}</button>)}
       </nav>
       <div className="nav-actions">
-        <label className="searchbox"><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher"/></label>
+        <button className="icon-btn search-toggle" aria-label="Rechercher" onClick={()=>setSearchOpen(v=>!v)}><Search size={17}/></button>
+        <label className={searchOpen || query ? "searchbox searchbox-open" : "searchbox"}><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={isSport ? "Chercher un sport…" : "Rechercher…"}/></label>
         <button className="icon-btn mobile-menu" aria-label="Menu" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen ? <X size={19}/> : <Menu size={19}/>}</button>
       </div>
     </div></header>
@@ -106,6 +108,7 @@ function App() {
         <p className="eyebrow">{isSport ? "L’ESSENTIEL DU SPORT, SANS LE BRUIT" : "L’ESSENTIEL, SANS LE BRUIT"}</p>
         <h1>{isSport ? <>Le sport,<br/><span>en mouvement.</span></> : <>L’économie,<br/><span>en perspective.</span></>}</h1>
         <p className="intro-sub">{isSport ? "Football, tennis, rugby, basket, cyclisme et les grands rendez-vous. L’actualité sportive, sélectionnée et contextualisée." : "Les actualités et les signaux qui comptent. Sélectionnés, contextualisés, expliqués."}</p>
+        <button className="hero-cta" onClick={()=>document.getElementById("fil")?.scrollIntoView({behavior:"smooth"})}>Voir les dernières actualités <ArrowRight size={15}/></button>
       </section>
 
       {isDemo && <div className="notice"><Wifi size={16}/><span><strong>Mode aperçu.</strong> Lance le serveur API pour charger les flux RSS réels. Les articles ci-dessous sont des exemples.</span></div>}
@@ -137,7 +140,7 @@ function App() {
         </aside>
       </section>
 
-      <section className="feed-section">
+      <section className="feed-section" id="fil">
         <div className="section-title-row"><div><p className="eyebrow">RESTER INFORMÉ</p><h2>{isSport ? "Le fil du sport" : "Le fil de l’économie"}</h2></div>
           <button className="refresh-btn" onClick={()=>loadNews()} disabled={loading}><RefreshCw size={15} className={loading ? "spin" : ""}/> Actualiser</button>
         </div>
@@ -148,7 +151,7 @@ function App() {
             else setCategory(c);
           }}>{c}</button>;
         })}</div>
-        {more.length ? <div className="story-list">{more.map(story=><article className="list-story" key={story.id}>
+        {more.length ? <div className="story-list">{more.map(story=><article className="list-story" key={story.id} onClick={() => story.url && window.open(story.url, "_blank", "noopener,noreferrer")}>
           <div className="list-category">{categoryIcon(story.category)}<span>{story.category || "Économie"}</span></div>
           <div className="list-main"><h3>{story.title}</h3><p>{story.description}</p><div className="list-meta">{story.source} <span>·</span> <Clock3 size={12}/> {fmtDate(story.publishedAt)}</div></div>
           {story.url && <a className="round-arrow" href={story.url} target="_blank" rel="noreferrer" aria-label="Lire l'article"><ArrowUpRight size={18}/></a>}
