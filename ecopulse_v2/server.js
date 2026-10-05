@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import Parser from "rss-parser";
 import dotenv from "dotenv";
-import path from "path";\nimport crypto from "crypto";
+import path from "path";
+import crypto from "crypto";
 import { fileURLToPath } from "url";
 
 dotenv.config();
