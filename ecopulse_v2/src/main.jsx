@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import "./style.css";
 
-const CATEGORIES = ["Toutes", "France", "Marchés", "Entreprises", "Monde"];
+const CATEGORIES = ["Toutes", "France", "Marchés", "Entreprises", "Monde", "Sport"];
+const SPORT_FILTERS = ["Tous les sports", "Football", "Tennis", "Rugby", "Basket", "Cyclisme", "Formule 1"];
 const fmtDate = value => {
   if (!value) return "Date non précisée";
   const date = new Date(value);
@@ -22,7 +23,7 @@ const fallbackStories = [
 
 function App() {
   const [articles, setArticles] = useState([]);
-  const [category, setCategory] = useState("Toutes");
+  const [category, setCategory] = useState(() => window.location.hash === "#sport" ? "Sport" : "Toutes");
   const [query, setQuery] = useState("");
   const [updatedAt, setUpdatedAt] = useState(null);
   const [sources, setSources] = useState([]);
@@ -30,6 +31,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isSport = category === "Sport";
 
   async function loadNews({ quiet = false } = {}) {
     if (!quiet) setLoading(true);
@@ -56,7 +58,12 @@ function App() {
     }
   }
 
-  useEffect(() => { loadNews(); }, [category]);
+  useEffect(() => {
+    document.title = isSport ? "ÉcoPulse Sport — Actualité sportive" : "ÉcoPulse — Actualité économique";
+    if (isSport && window.location.hash !== "#sport") window.history.replaceState({}, "", "#sport");
+    if (!isSport && window.location.hash === "#sport") window.history.replaceState({}, "", "#");
+    loadNews();
+  }, [category]);
   useEffect(() => {
     const id = setTimeout(() => loadNews({ quiet: true }), 350);
     return () => clearTimeout(id);
@@ -80,7 +87,7 @@ function App() {
 
   return <div className="app-shell">
     <div className="topline"><div className="wrap top-line-inner">
-      <span>LE BRIEF ÉCONOMIQUE</span><span className="top-date">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "full" }).format(new Date())}</span>
+      <span>{isSport ? "LE BRIEF SPORTIF" : "LE BRIEF ÉCONOMIQUE"}</span><span className="top-date">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "full" }).format(new Date())}</span>
       <span className="live-status"><i/> {isDemo ? "Mode aperçu" : "Flux connectés"}</span>
     </div></div>
     <header className="site-header"><div className="wrap nav">
@@ -96,12 +103,13 @@ function App() {
 
     <main className="wrap">
       <section className="intro">
-        <p className="eyebrow">L’ESSENTIEL, SANS LE BRUIT</p>
-        <h1>L’économie,<br/><span>en perspective.</span></h1>
-        <p className="intro-sub">Les actualités et les signaux qui comptent. Sélectionnés, contextualisés, expliqués.</p>
+        <p className="eyebrow">{isSport ? "L’ESSENTIEL DU SPORT, SANS LE BRUIT" : "L’ESSENTIEL, SANS LE BRUIT"}</p>
+        <h1>{isSport ? <>Le sport,<br/><span>en mouvement.</span></> : <>L’économie,<br/><span>en perspective.</span></>}</h1>
+        <p className="intro-sub">{isSport ? "Football, tennis, rugby, basket, cyclisme et les grands rendez-vous. L’actualité sportive, sélectionnée et contextualisée." : "Les actualités et les signaux qui comptent. Sélectionnés, contextualisés, expliqués."}</p>
       </section>
 
       {isDemo && <div className="notice"><Wifi size={16}/><span><strong>Mode aperçu.</strong> Lance le serveur API pour charger les flux RSS réels. Les articles ci-dessous sont des exemples.</span></div>}
+      {isSport && !isDemo && <div className="sport-banner"><span>SPORT EN CONTINU</span><strong>Football · Tennis · Rugby · Basket · Cyclisme · F1</strong><small>Flux d’actualité mis à jour automatiquement.</small></div>}
       {!isDemo && errors.length > 0 && <div className="notice"><Wifi size={16}/><span>Certains flux ne répondent pas. Les articles disponibles restent consultables.</span></div>}
 
       <section className="lead-grid">
@@ -133,7 +141,13 @@ function App() {
         <div className="section-title-row"><div><p className="eyebrow">RESTER INFORMÉ</p><h2>Le fil de l’économie</h2></div>
           <button className="refresh-btn" onClick={()=>loadNews()} disabled={loading}><RefreshCw size={15} className={loading ? "spin" : ""}/> Actualiser</button>
         </div>
-        <div className="filter-row">{CATEGORIES.map(c=><button key={c} className={category===c?"filter active":"filter"} onClick={()=>setCategory(c)}>{c}</button>)}</div>
+        <div className="filter-row">{(isSport ? SPORT_FILTERS : CATEGORIES).map(c => {
+          const active = isSport ? (c === "Tous les sports" ? !query : query.toLocaleLowerCase("fr") === c.toLocaleLowerCase("fr")) : category === c;
+          return <button key={c} className={active ? "filter active" : "filter"} onClick={() => {
+            if (isSport) setQuery(c === "Tous les sports" ? "" : c);
+            else setCategory(c);
+          }}>{c}</button>;
+        })}</div>
         {more.length ? <div className="story-list">{more.map(story=><article className="list-story" key={story.id}>
           <div className="list-category">{categoryIcon(story.category)}<span>{story.category || "Économie"}</span></div>
           <div className="list-main"><h3>{story.title}</h3><p>{story.description}</p><div className="list-meta">{story.source} <span>·</span> <Clock3 size={12}/> {fmtDate(story.publishedAt)}</div></div>
@@ -141,11 +155,11 @@ function App() {
         </article>)}</div> : <div className="empty">{loading ? "Chargement des actualités…" : "Pas d’autres articles pour le moment. Essayez une autre catégorie ou recherche."}</div>}
       </section>
 
-      <section className="market-strip">
+      {!isSport && <section className="market-strip">
         <div className="market-intro"><p className="eyebrow">LES REPÈRES</p><h2>Les marchés,<br/>en un regard.</h2><p>Connectez un fournisseur de données financières pour afficher les cotations en direct.</p></div>
         <div className="market-placeholder"><div className="market-symbol"><Landmark size={20}/></div><span className="market-title">Indicateurs de marché</span><strong>À connecter</strong><span className="market-foot">API financière requise pour les cours temps réel</span></div>
         <div className="market-placeholder"><div className="market-symbol"><TrendingUp size={20}/></div><span className="market-title">Devises & matières premières</span><strong>À connecter</strong><span className="market-foot">Les cours peuvent être différés selon le fournisseur</span></div>
-      </section>
+      </section>}
 
       <section className="newsletter">
         <div><p className="eyebrow">LE BRIEF, DANS VOTRE BOÎTE MAIL</p><h2>Comprendre plus.<br/>Défiler moins.</h2><p>Une sélection claire des actualités qui comptent.</p></div>
