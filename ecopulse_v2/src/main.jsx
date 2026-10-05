@@ -95,6 +95,7 @@ function App() {
       <a className="brand" href="#"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a>
       <nav className={mobileOpen ? "nav-links open" : "nav-links"}>
         {CATEGORIES.map(c => <button key={c} className={category === c ? "nav-link active" : "nav-link"} onClick={() => {setCategory(c);setMobileOpen(false)}}>{c === "Toutes" ? "À la une" : c}</button>)}
+        <a className="nav-link nav-agency-link" href="/agence" onClick={()=>setMobileOpen(false)}>NOA STUDIO</a>
       </nav>
       <div className="nav-actions">
         <button className="icon-btn search-toggle" aria-label="Rechercher" onClick={()=>setSearchOpen(v=>!v)}><Search size={17}/></button>
@@ -174,7 +175,7 @@ function App() {
         <div className="updated">Dernière vérification : {updatedAt ? fmtDate(updatedAt) : "—"} <span>· Actualisation automatique toutes les 5 min</span></div>
       </section>
     </main>
-    <footer><div className="wrap footer-inner"><a className="brand" href="#"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a><span>{isSport ? "Le sport, expliqué simplement." : "L’économie, expliquée simplement."}</span><span>© {new Date().getFullYear()} ÉcoPulse</span></div><div className="wrap footer-note">Les contenus sont fournis par des sources tierces. Vérifiez les informations auprès de l’éditeur original. Les données de marché nécessitent une source financière distincte.</div></footer>
+    <footer><div className="wrap footer-inner"><a className="brand" href="/"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a><span>{isSport ? "Le sport, expliqué simplement." : "L’économie, expliquée simplement."}</span><div className="footer-links"><a href="/agence">NOA STUDIO</a><a href="/agence/chat">Projet / Chat</a><span>© {new Date().getFullYear()} ÉcoPulse</span></div></div><div className="wrap footer-note">Les contenus sont fournis par des sources tierces. Vérifiez les informations auprès de l’éditeur original. Les données de marché nécessitent une source financière distincte.</div></footer>
   </div>;
 }
 
@@ -185,7 +186,7 @@ function AgencyPage() {
     {name:"PREMIUM", price:"999 €", text:"Une présence complète avec une expérience plus travaillée.", items:["Tout le Pro","Animations premium","Pages sur mesure","Suivi analytics","Optimisations mensuelles"]},
   ];
   return <div className="agency-page">
-    <div className="agency-nav"><div className="agency-wrap"><a className="agency-logo" href="/agence"><span>n.</span> NOA STUDIO</a><div className="agency-nav-links"><a href="#services">Services</a><a href="#portfolio">Portfolio</a><a href="#tarifs">Tarifs</a><a className="agency-nav-cta" href="#contact">Parler du projet <ArrowRight size={14}/></a></div></div></div>
+    <div className="agency-nav"><div className="agency-wrap"><a className="agency-logo" href="/agence"><span>n.</span> NOA STUDIO</a><div className="agency-nav-links"><a href="/">ÉcoPulse</a><a href="/#sport">Sport</a><a href="#services">Services</a><a href="#portfolio">Portfolio</a><a href="#tarifs">Tarifs</a><a className="agency-nav-cta" href="/agence/chat">Parler du projet <ArrowRight size={14}/></a></div></div></div>
     <main>
       <section className="agency-hero"><div className="agency-wrap agency-hero-grid"><div><p className="agency-eyebrow">STUDIO WEB · FRANCE</p><h1>Des sites qui donnent<br/><em>envie de vous choisir.</em></h1><p className="agency-lead">Je crée des sites modernes, rapides et pensés pour transformer une présence en ligne en vrais contacts clients.</p><div className="agency-actions"><a className="agency-primary" href="#contact">Créer mon site <ArrowRight size={15}/></a><a className="agency-secondary" href="#portfolio">Voir les réalisations</a></div><div className="agency-proof"><span>✓ Design sur mesure</span><span>✓ Mobile-first</span><span>✓ Mise en ligne incluse</span></div></div><div className="agency-visual"><div className="browser-card"><div className="browser-top"><i/><i/><i/><span>votre-entreprise.fr</span></div><div className="browser-content"><small>VOTRE MARQUE</small><strong>Une présence qui<br/>fait la différence.</strong><div className="browser-line"/><div className="browser-pill">Prendre rendez-vous →</div></div></div></div></div></section>
       <section className="agency-section" id="services"><div className="agency-wrap"><p className="agency-eyebrow">CE QUE JE FAIS</p><h2>Simple pour vous.<br/>Puissant pour vos clients.</h2><div className="agency-services"><article><b>01</b><h3>Création</h3><p>Un site pensé autour de votre activité, de vos clients et de votre image.</p></article><article><b>02</b><h3>Conversion</h3><p>Des appels à l’action clairs, des formulaires et des parcours qui donnent envie de passer à l’action.</p></article><article><b>03</b><h3>Visibilité</h3><p>Structure SEO locale, performance mobile et fondations techniques propres.</p></article></div></div></section>
@@ -193,7 +194,7 @@ function AgencyPage() {
       <section className="agency-section" id="tarifs"><div className="agency-wrap"><p className="agency-eyebrow">OFFRES</p><h2>Un prix clair.<br/>Pas de mauvaise surprise.</h2><div className="agency-pricing">{offers.map((o,i)=><article className={i===1?"agency-price featured":"agency-price"} key={o.name}>{i===1&&<span className="agency-badge">LE PLUS CHOISI</span>}<p>{o.name}</p><strong>{o.price}</strong><span>à partir de</span><h3>{o.text}</h3><ul>{o.items.map(x=><li key={x}>✓ {x}</li>)}</ul><a href="#contact">Choisir cette offre <ArrowRight size={14}/></a></article>)}</div><div className="agency-retainer"><div><p>MAINTENANCE</p><strong>49 €/mois</strong></div><span>Modifications, surveillance, petites améliorations et suivi du site.</span></div></div></section>
       <section className="agency-section agency-contact" id="contact"><div className="agency-wrap agency-contact-box"><div><p className="agency-eyebrow">VOTRE PROJET</p><h2>On transforme votre idée<br/>en site cette semaine.</h2><p>Expliquez simplement votre activité. La première discussion sert à définir le besoin et le bon format.</p></div><div className="agency-contact-card"><strong>Prêt à commencer ?</strong><p>Remplacez ce bouton par votre e-mail, WhatsApp ou Calendly avant de prospecter.</p><a href="/agence/chat">Discuter de mon projet <ArrowRight size={15}/></a></div></div></section>
     </main>
-    <footer className="agency-footer"><div className="agency-wrap"><strong>n. NOA STUDIO</strong><span>Sites web modernes pour entreprises ambitieuses.</span><a href="/">Voir EcoPulse</a></div></footer>
+    <footer className="agency-footer"><div className="agency-wrap"><strong>n. NOA STUDIO</strong><span>Sites web modernes pour entreprises ambitieuses.</span><div><a href="/">ÉcoPulse</a><span> · </span><a href="/#sport">Sport</a><span> · </span><a href="/agence/chat">Chat projet</a></div></div></footer>
   </div>;
 }
 
@@ -248,7 +249,7 @@ function ChatPage() {
   }
 
   if (!conversation) return <div className="chat-page"><div className="chat-card chat-start-card">
-    <a className="chat-back" href="/agence">← NOA STUDIO</a>
+    <a className="chat-back" href="/">← ÉcoPulse · NOA STUDIO</a>
     <div className="chat-brand">n.</div>
     <p className="agency-eyebrow">DISCUSSION PROJET</p>
     <h1>Parlons de<br/><em>votre projet.</em></h1>
@@ -262,7 +263,7 @@ function ChatPage() {
   </div></div>;
 
   return <div className="chat-page"><div className="chat-shell">
-    <header className="chat-header"><a href="/agence" className="chat-brand-mini"><span>n.</span> NOA STUDIO</a><div><strong>{conversation.name}</strong><small>{conversation.email}</small></div><a href="/agence" className="chat-close">×</a></header>
+    <header className="chat-header"><a href="/" className="chat-brand-mini"><span>n.</span> NOA STUDIO · ÉcoPulse</a><div><strong>{conversation.name}</strong><small>{conversation.email}</small></div><a href="/" className="chat-close">×</a></header>
     <div className="chat-status"><span/> Conversation privée · Réponse de Noa</div>
     <div className="chat-messages">{conversation.messages.length ? conversation.messages.map(message =>
       <div key={message.id} className={"chat-message " + (message.sender === "client" ? "client" : "owner")}><div>{message.text}</div><small>{new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(new Date(message.createdAt))}</small></div>
@@ -313,13 +314,13 @@ function ChatAdminPage() {
   }
 
   if (!authorized) return <div className="chat-page"><div className="chat-card chat-start-card">
-    <a className="chat-back" href="/agence">← NOA STUDIO</a><div className="chat-brand">n.</div>
+    <a className="chat-back" href="/">← ÉcoPulse · NOA STUDIO</a><div className="chat-brand">n.</div>
     <p className="agency-eyebrow">ESPACE NOA STUDIO</p><h1>Messages<br/><em>clients.</em></h1>
     <form onSubmit={login} className="chat-form"><label>Clé administrateur<input type="password" value={key} onChange={e=>setKey(e.target.value)} placeholder="Votre clé" required/></label><button>Ouvrir les conversations <ArrowRight size={15}/></button></form>
     {error && <p className="chat-error">{error}</p>}
   </div></div>;
 
-  return <div className="chat-admin"><header><a href="/agence" className="chat-brand-mini"><span>n.</span> NOA STUDIO</a><strong>Conversations clients</strong><a href="/agence" className="chat-close">×</a></header>
+  return <div className="chat-admin"><header><a href="/" className="chat-brand-mini"><span>n.</span> NOA STUDIO · ÉcoPulse</a><strong>Conversations clients</strong><a href="/" className="chat-close">×</a></header>
     <div className="chat-admin-grid"><aside className="chat-list">{conversations.length ? conversations.map(c=><button key={c.id} className={selected?.id===c.id?"selected":""} onClick={()=>setSelected(c)}><strong>{c.name}</strong><span>{c.email}</span><small>{c.messages.at(-1)?.text || "Nouvelle conversation"}</small></button>) : <p>Aucune conversation pour le moment.</p>}</aside>
       <section className="chat-admin-window">{selected ? <><div className="chat-admin-title"><strong>{selected.name}</strong><span>{selected.email}</span></div><div className="chat-messages">{selected.messages.map(message=><div key={message.id} className={"chat-message " + (message.sender === "owner" ? "owner" : "client")}><div>{message.text}</div><small>{new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(new Date(message.createdAt))}</small></div>)}</div><form className="chat-composer" onSubmit={reply}><input value={text} onChange={e=>setText(e.target.value)} placeholder="Répondre au client…"/><button disabled={!text.trim()}><ArrowRight size={18}/></button></form></> : <div className="chat-empty">Sélectionne une conversation.</div>}</section>
     </div>
