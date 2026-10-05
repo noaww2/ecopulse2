@@ -2,16 +2,21 @@ import express from "express";
 import cors from "cors";
 import Parser from "rss-parser";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
 const app = express();
 const parser = new Parser({
   timeout: 12000,
-  headers: { "User-Agent": "EcoPulse/2.0 (+https://example.com; news reader)" }
+  headers: { "User-Agent": "EcoPulse/2.0 news reader" }
 });
 const PORT = Number(process.env.PORT || 8787);
 const TTL = Math.max(60, Number(process.env.CACHE_TTL_SECONDS || 300)) * 1000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DIST = path.join(__dirname, "dist");
 
 app.use(cors());
 app.use(express.json());
@@ -36,6 +41,7 @@ let cache = { at: 0, articles: [], sources: [], errors: [] };
 function cleanText(value = "") {
   return String(value).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
+
 function toArticle(item, feed) {
   const title = cleanText(item.title || "");
   const description = cleanText(item.contentSnippet || item.summary || item.content || "");
@@ -46,6 +52,7 @@ function toArticle(item, feed) {
   const publishedAt = rawDate && !Number.isNaN(Date.parse(rawDate))
     ? new Date(rawDate).toISOString()
     : null;
+
   return {
     id: item.guid || item.link || `${feed.name}-${title}`,
     title,
@@ -68,23 +75,26 @@ async function refreshFeeds() {
     name: feed.name,
     articles: await fetchFeed(feed)
   })));
+
   const articles = [];
   const sources = [];
   const errors = [];
+
   for (const result of results) {
     if (result.status === "fulfilled") {
       sources.push({ name: result.value.name, status: "ok", count: result.value.articles.length });
       articles.push(...result.value.articles);
     } else {
-      const message = String(result.reason?.message || "Flux indisponible");
-      errors.push(message);
+      errors.push(String(result.reason?.message || "Flux indisponible"));
     }
   }
+
   const unique = new Map();
   for (const item of articles) {
     const key = item.url || item.title.toLowerCase();
     if (!unique.has(key)) unique.set(key, item);
   }
+
   cache = {
     at: Date.now(),
     articles: [...unique.values()].sort((a, b) =>
@@ -93,24 +103,36 @@ async function refreshFeeds() {
     sources,
     errors
   };
+
   return cache;
 }
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "ÉcoPulse API", version: "2.0.0", time: new Date().toISOString() });
+  res.json({
+    ok: true,
+    service: "ÉcoPulse API",
+    version: "2.0.1",
+    time: new Date().toISOString()
+  });
 });
 
 app.get("/api/news", async (req, res) => {
   try {
     if (!cache.at || Date.now() - cache.at > TTL) await refreshFeeds();
+
     const q = String(req.query.q || "").toLocaleLowerCase("fr").trim();
     const category = String(req.query.category || "Toutes");
     const limit = Math.min(100, Math.max(1, Number(req.query.limit || 50)));
+
     const filtered = cache.articles.filter(article => {
-      const matchesQ = !q || `${article.title} ${article.description} ${article.source}`.toLocaleLowerCase("fr").includes(q);
+      const matchesQ = !q ||
+        `${article.title} ${article.description} ${article.source}`
+          .toLocaleLowerCase("fr")
+          .includes(q);
       const matchesCategory = category === "Toutes" || article.category === category;
       return matchesQ && matchesCategory;
     });
+
     res.json({
       articles: filtered.slice(0, limit),
       updatedAt: new Date(cache.at).toISOString(),
@@ -128,17 +150,25 @@ app.get("/api/news", async (req, res) => {
   }
 });
 
-// Optional NewsAPI endpoint: key remains on the server and is never exposed to the browser.
 app.get("/api/newsapi", async (req, res) => {
   if (!process.env.NEWSAPI_KEY) {
-    return res.status(503).json({ error: "NEWSAPI_KEY n'est pas configurée. Utilisez les flux RSS ou ajoutez une clé dans .env." });
+    return res.status(503).json({
+      error: "NEWSAPI_KEY n'est pas configurée. Utilisez les flux RSS ou ajoutez une clé dans .env."
+    });
   }
+
   try {
     const q = encodeURIComponent(String(req.query.q || "économie OR finance OR entreprise"));
     const url = `https://newsapi.org/v2/everything?q=${q}&language=fr&sortBy=publishedAt&pageSize=50&apiKey=${process.env.NEWSAPI_KEY}`;
     const response = await fetch(url);
     const data = await response.json();
-    if (!response.ok) return res.status(response.status).json({ error: data.message || "Erreur du fournisseur d'actualités." });
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data.message || "Erreur du fournisseur d'actualités."
+      });
+    }
+
     res.json({
       articles: (data.articles || []).map((item, index) => ({
         id: item.url || `${item.title}-${index}`,
@@ -154,10 +184,23 @@ app.get("/api/newsapi", async (req, res) => {
       mode: "newsapi"
     });
   } catch {
-    res.status(502).json({ error: "Le fournisseur d'actualités est momentanément indisponible." });
+    res.status(502).json({
+      error: "Le fournisseur d'actualités est momentanément indisponible."
+    });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`ÉcoPulse API disponible sur http://localhost:${PORT}`);
+// Serve the production Vite build.
+app.use(express.static(DIST));
+
+// SPA fallback: every non-API route returns the Vite index.html.
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  res.sendFile(path.join(DIST, "index.html"));
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`ÉcoPulse disponible sur le port ${PORT}`);
 });
