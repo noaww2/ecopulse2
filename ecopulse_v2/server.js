@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import Parser from "rss-parser";
 import dotenv from "dotenv";
-import path from "path";
+import path from "path";\nimport crypto from "crypto";
 import { fileURLToPath } from "url";
 
 dotenv.config();
@@ -194,6 +194,57 @@ app.get("/api/newsapi", async (req, res) => {
       error: "Le fournisseur d'actualités est momentanément indisponible."
     });
   }
+});
+
+
+// Simple NOA STUDIO project chat. Conversations live in memory for the current service instance.
+const chatConversations = new Map();
+const chatAdminKey = process.env.NOA_CHAT_ADMIN_KEY || "NOA-CHAT-ADMIN-2026";
+
+function chatText(value, max = 2000) {
+  return String(value || "").replace(/[<>]/g, "").trim().slice(0, max);
+}
+
+app.post("/api/chat/start", (req, res) => {
+  const name = chatText(req.body?.name, 80);
+  const email = chatText(req.body?.email, 160).toLowerCase();
+  if (!name || !email || !email.includes("@")) return res.status(400).json({ error: "Nom et e-mail requis." });
+  const id = crypto.randomUUID();
+  const conversation = {
+    id,
+    name,
+    email,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    messages: []
+  };
+  chatConversations.set(id, conversation);
+  res.status(201).json(conversation);
+});
+
+app.get("/api/chat/:id", (req, res) => {
+  const conversation = chatConversations.get(req.params.id);
+  if (!conversation) return res.status(404).json({ error: "Conversation introuvable." });
+  res.json(conversation);
+});
+
+app.post("/api/chat/:id/messages", (req, res) => {
+  const conversation = chatConversations.get(req.params.id);
+  if (!conversation) return res.status(404).json({ error: "Conversation introuvable." });
+  const sender = req.body?.sender === "owner" ? "owner" : "client";
+  const text = chatText(req.body?.text);
+  if (!text) return res.status(400).json({ error: "Message vide." });
+  const message = { id: crypto.randomUUID(), sender, text, createdAt: new Date().toISOString() };
+  conversation.messages.push(message);
+  conversation.updatedAt = message.createdAt;
+  res.status(201).json(message);
+});
+
+app.get("/api/chat-admin/conversations", (req, res) => {
+  if (req.headers["x-admin-key"] !== chatAdminKey) return res.status(401).json({ error: "Accès refusé." });
+  const conversations = [...chatConversations.values()]
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  res.json(conversations);
 });
 
 // Serve the production Vite build.
