@@ -116,7 +116,7 @@ function App() {
         <div className="lead-column">
           <div className="section-kicker"><span>À LA UNE</span><span className="rule"/></div>
           {loading && !lead ? <div className="skeleton lead-skeleton"/> : lead ? <article className="lead-story">
-            <div className="lead-image"><div className="orb orb-one"/><div className="orb orb-two"/><span className="image-label">ÉCONOMIE / ANALYSE</span></div>
+            <div className="lead-image"><div className="orb orb-one"/><div className="orb orb-two"/><span className="image-label">{isSport ? "SPORT / ACTUALITÉS" : "ÉCONOMIE / ANALYSE"}</span></div>
             <div className="lead-copy">
               <div className="meta">{lead.category || "Économie"} <span>·</span> {fmtDate(lead.publishedAt)}</div>
               <h2>{lead.title}</h2>
@@ -138,7 +138,7 @@ function App() {
       </section>
 
       <section className="feed-section">
-        <div className="section-title-row"><div><p className="eyebrow">RESTER INFORMÉ</p><h2>Le fil de l’économie</h2></div>
+        <div className="section-title-row"><div><p className="eyebrow">RESTER INFORMÉ</p><h2>{isSport ? "Le fil du sport" : "Le fil de l’économie"}</h2></div>
           <button className="refresh-btn" onClick={()=>loadNews()} disabled={loading}><RefreshCw size={15} className={loading ? "spin" : ""}/> Actualiser</button>
         </div>
         <div className="filter-row">{(isSport ? SPORT_FILTERS : CATEGORIES).map(c => {
@@ -171,7 +171,7 @@ function App() {
         <div className="updated">Dernière vérification : {updatedAt ? fmtDate(updatedAt) : "—"} <span>· Actualisation automatique toutes les 5 min</span></div>
       </section>
     </main>
-    <footer><div className="wrap footer-inner"><a className="brand" href="#"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a><span>L’économie, expliquée simplement.</span><span>© {new Date().getFullYear()} ÉcoPulse</span></div><div className="wrap footer-note">Les contenus sont fournis par des sources tierces. Vérifiez les informations auprès de l’éditeur original. Les données de marché nécessitent une source financière distincte.</div></footer>
+    <footer><div className="wrap footer-inner"><a className="brand" href="#"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a><span>{isSport ? "Le sport, expliqué simplement." : "L’économie, expliquée simplement."}</span><span>© {new Date().getFullYear()} ÉcoPulse</span></div><div className="wrap footer-note">Les contenus sont fournis par des sources tierces. Vérifiez les informations auprès de l’éditeur original. Les données de marché nécessitent une source financière distincte.</div></footer>
   </div>;
 }
 
