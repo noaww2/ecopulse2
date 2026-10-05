@@ -25,7 +25,13 @@ const FEEDS = [
   { name: "Franceinfo Économie", url: "https://www.francetvinfo.fr/economie.rss", category: "France" },
   { name: "Les Échos", url: "https://www.lesechos.fr/rss/rss_une.xml", category: "Entreprises" },
   { name: "Boursorama", url: "https://www.boursorama.com/rss/actualites/", category: "Marchés" },
-  { name: "Euronews Économie", url: "https://fr.euronews.com/rss?level=theme&name=business", category: "Monde" }
+  { name: "Euronews Économie", url: "https://fr.euronews.com/rss?level=theme&name=business", category: "Monde" },
+  { name: "Le Monde Sport", url: "https://www.lemonde.fr/sport/rss_full.xml", category: "Sport" },
+  { name: "Le Monde Football", url: "https://www.lemonde.fr/football/rss_full.xml", category: "Sport" },
+  { name: "Le Monde Rugby", url: "https://www.lemonde.fr/rugby/rss_full.xml", category: "Sport" },
+  { name: "Le Monde Tennis", url: "https://www.lemonde.fr/tennis/rss_full.xml", category: "Sport" },
+  { name: "Le Monde Cyclisme", url: "https://www.lemonde.fr/cyclisme/rss_full.xml", category: "Sport" },
+  { name: "Le Monde Basket", url: "https://www.lemonde.fr/basket/rss_full.xml", category: "Sport" }
 ];
 
 const TERMS = [
