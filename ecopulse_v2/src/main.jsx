@@ -180,7 +180,7 @@ function App() {
 }
 
 
-function TradingViewChart({symbol="OANDA:XAUUSD", interval="15"}) {
+function TradingViewChart({symbol="OANDA:XAUUSD", interval="1S"}) {
   const container = useRef(null);
   useEffect(() => {
     if (!container.current) return;
