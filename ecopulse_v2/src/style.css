@@ -1,528 +1,64 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
-import {
-  ArrowRight, ArrowUpRight, Clock3, Search, RefreshCw, TrendingUp,
-  Newspaper, Globe2, Building2, Landmark, Menu, X, Wifi
-} from "lucide-react";
-import "./style.css";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+:root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;color:#1d1d1f;background:#fbfbfd;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;--ink:#1d1d1f;--muted:#74747a;--line:#e5e5e9;--blue:#1769d2;--surface:#fff}
+*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}.wrap{width:min(1160px,90%);margin:auto}
+.topline{font-size:10px;letter-spacing:.09em;color:#797980;border-bottom:1px solid var(--line)}.top-line-inner{height:33px;display:flex;align-items:center;justify-content:space-between}.live-status{display:flex;align-items:center;gap:7px}.live-status i,.status-dot{width:6px;height:6px;border-radius:50%;background:#28a36a;display:inline-block}
+.site-header{position:sticky;top:0;z-index:10;background:rgba(251,251,253,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,0,0,.06)}.nav{height:65px;display:flex;align-items:center;justify-content:space-between;gap:25px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.5px;font-size:18px;white-space:nowrap}.brand-mark{display:grid;place-items:center;background:#1d1d1f;color:#fff;width:27px;height:27px;border-radius:9px;font-size:17px}
+.nav-links{display:flex;gap:22px;align-items:center}.nav-link{border:0;background:transparent;color:#626268;font-size:12px;padding:8px 0}.nav-link:hover,.nav-link.active{color:#111;font-weight:650}.nav-actions{display:flex;align-items:center;gap:10px}.search-toggle{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:#fff;color:#666;transition:.2s}.search-toggle:hover{transform:translateY(-1px);color:#111}.searchbox{display:flex;align-items:center;gap:7px;border:1px solid #e0e0e4;background:#fff;border-radius:999px;padding:8px 11px;color:#8a8a90;width:0;opacity:0;overflow:hidden;transition:width .22s ease,opacity .18s ease,padding .22s ease}.searchbox.searchbox-open{width:180px;opacity:1}.searchbox input{border:0;outline:0;background:transparent;width:140px;font-size:12px}.icon-btn{border:0;background:transparent;display:grid;place-items:center}.mobile-menu{display:none}
+.intro{padding:78px 0 50px;text-align:center}.eyebrow{font-size:10px;letter-spacing:.13em;font-weight:700;color:#77777e;margin:0 0 12px}.intro h1{font-size:clamp(42px,6.7vw,78px);line-height:.99;letter-spacing:-.065em;font-weight:650;margin:0}.intro h1 span{color:#77777e}.intro-sub{font-size:15px;color:var(--muted);max-width:470px;margin:20px auto 0;line-height:1.65}.hero-cta{margin-top:22px;display:inline-flex;align-items:center;gap:8px;border:0;background:#1d1d1f;color:#fff;border-radius:999px;padding:11px 16px;font-size:11px;font-weight:600;box-shadow:0 8px 25px rgba(0,0,0,.08);transition:transform .2s ease,box-shadow .2s ease}.hero-cta:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.12)}
 
-const CATEGORIES = ["Toutes", "France", "Marchés", "Entreprises", "Monde", "Sport"];
-const SPORT_FILTERS = ["Tous les sports", "Football", "Tennis", "Rugby", "Basket", "Cyclisme", "Formule 1"];
-const fmtDate = value => {
-  if (!value) return "Date non précisée";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Date non précisée";
-  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(date);
-};
+.sport-banner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;background:#111;color:#fff;border-radius:16px;padding:15px 18px;margin:0 0 30px}.sport-banner span{font-size:9px;letter-spacing:.13em;font-weight:700;color:#bfc6d1}.sport-banner strong{font-size:12px;font-weight:600;letter-spacing:-.01em}.sport-banner small{font-size:10px;color:#9299a5}
+.notice{display:flex;gap:10px;align-items:flex-start;background:#f0f5ff;border:1px solid #d9e6ff;color:#304c78;padding:13px 15px;border-radius:12px;font-size:12px;margin:0 0 30px}.notice svg{flex-shrink:0;margin-top:1px}
+.lead-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:46px;padding:10px 0 50px}.section-kicker{display:flex;align-items:center;gap:13px;font-size:10px;font-weight:700;letter-spacing:.13em;color:#66666c;margin-bottom:19px}.rule{height:1px;background:var(--line);flex:1}
+.lead-story{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:transform .22s ease,box-shadow .22s ease}.lead-story:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.07)}.lead-image{height:190px;position:relative;overflow:hidden;background:linear-gradient(125deg,#eaf1f9,#d8e5f4 55%,#f3f6fb)}.orb{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.75)}.orb-one{width:290px;height:290px;right:6%;top:-100px;background:radial-gradient(circle at 40% 40%,#fff,#e1eaf6 70%);box-shadow:0 20px 60px rgba(71,100,145,.12)}.orb-two{width:190px;height:190px;right:27%;top:45px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(191,212,239,.3))}.image-label{position:absolute;bottom:14px;left:18px;font-size:9px;letter-spacing:.13em;color:#61738c;font-weight:700}.lead-copy{padding:25px}.meta{font-size:10px;color:#77777e;letter-spacing:.035em}.meta span{padding:0 4px;color:#b2b2b7}.lead-copy h2{font-size:clamp(23px,3vw,33px);line-height:1.14;letter-spacing:-.045em;margin:12px 0;font-weight:650}.lead-copy>p{font-size:13px;line-height:1.65;color:var(--muted);margin:0}.story-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #f0f0f2;margin-top:22px;padding-top:16px}.source-name,.sample-label{font-size:10px;color:#77777e}.read-link{display:inline-flex;align-items:center;gap:5px;color:var(--blue);font-size:11px;font-weight:650}.read-link:hover{text-decoration:underline}
+.latest-column{min-width:0}.compact-story{display:grid;grid-template-columns:27px 1fr;gap:13px;padding:0 0 22px;margin-bottom:20px;border-bottom:1px solid var(--line)}.compact-story:last-child{border:0;margin:0}.compact-index{font-size:11px;color:#b1b1b6;font-weight:600;padding-top:1px}.compact-story h3{font-size:17px;letter-spacing:-.035em;line-height:1.3;margin:8px 0}.compact-story p{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 8px}.muted{font-size:12px;color:var(--muted)}
+.feed-section{padding:44px 0 65px;border-top:1px solid var(--line)}.section-title-row{display:flex;align-items:end;justify-content:space-between;gap:20px}.section-title-row .eyebrow{margin-bottom:7px}.section-title-row h2,.market-intro h2{font-size:32px;letter-spacing:-.055em;line-height:1.08;margin:0;font-weight:650}.refresh-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;background:#fff;padding:9px 13px;font-size:11px;color:#505057}.refresh-btn:disabled{opacity:.65}.filter-row{display:flex;gap:7px;flex-wrap:wrap;margin:24px 0 10px}.filter{background:transparent;border:1px solid transparent;border-radius:999px;padding:7px 12px;color:#77777e;font-size:11px}.filter.active{background:#1d1d1f;color:#fff}
+.story-list{border-top:1px solid var(--line)}.list-story{display:grid;cursor:pointer;transition:background .18s ease,transform .18s ease;padding-left:8px;padding-right:8px;border-radius:10px}.list-story:hover{background:#fff;transform:translateX(3px)}.list-story{display:grid;grid-template-columns:145px 1fr 35px;gap:20px;align-items:center;padding:23px 8px;border-bottom:1px solid var(--line)}.list-category{display:flex;align-items:center;gap:8px;color:#77777e;font-size:11px}.list-main h3{font-size:18px;letter-spacing:-.025em;line-height:1.3;margin:0 0 7px;font-weight:600}.list-main p{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 9px}.list-meta{display:flex;align-items:center;gap:6px;color:#85858b;font-size:10px}.round-arrow{width:31px;height:31px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:#555}.round-arrow:hover{color:var(--blue);border-color:#a9c9f4}.empty{padding:28px;text-align:center;border:1px dashed #d8d8de;border-radius:14px;color:var(--muted);font-size:12px}.skeleton{height:390px;border-radius:18px;background:linear-gradient(90deg,#f0f0f3,#fafafd,#f0f0f3);background-size:200% 100%;animation:shimmer 1.5s infinite}@keyframes shimmer{to{background-position:-200% 0}}.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.market-strip{background:#f1f1f5;border-radius:22px;padding:35px;display:grid;grid-template-columns:.9fr 1fr 1fr;gap:15px;margin:10px 0 65px}.market-intro{padding:8px 20px 8px 0}.market-intro h2{font-size:29px}.market-intro>p:last-child{font-size:12px;color:var(--muted);line-height:1.6;max-width:240px;margin-top:13px}.market-placeholder{background:#fff;border:1px solid #e6e6ea;border-radius:16px;padding:21px;display:flex;flex-direction:column;align-items:flex-start;min-height:160px}.market-symbol{width:35px;height:35px;background:#f2f2f7;border-radius:11px;display:grid;place-items:center;margin-bottom:15px}.market-title{font-size:12px;color:#6e6e73}.market-placeholder strong{font-size:20px;letter-spacing:-.04em;margin:4px 0 8px}.market-foot{font-size:10px;color:#8a8a90;line-height:1.5}
+.newsletter{display:flex;align-items:center;justify-content:space-between;gap:25px;padding:40px 0 55px;border-top:1px solid var(--line)}.newsletter h2{font-size:32px;line-height:1.08;letter-spacing:-.05em;margin:0}.newsletter>div>p:last-child{font-size:12px;color:var(--muted);margin:10px 0 0}.newsletter form{display:flex;gap:8px}.newsletter input{width:230px;border:1px solid #d8d8de;background:#fff;border-radius:999px;padding:12px 15px;font-size:11px;outline:none}.newsletter input:focus{border-color:#8bb7ed}.newsletter form button{display:flex;align-items:center;gap:8px;background:#1d1d1f;color:white;border:0;border-radius:999px;padding:12px 16px;font-size:11px;font-weight:600}.source-status{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding:20px 0 28px}.source-status>div:first-child{display:flex;align-items:center;gap:10px}.source-status strong{font-size:11px}.source-status p,.updated{font-size:10px;color:#8a8a90;margin:3px 0 0}.updated span{color:#a4a4aa}
+footer{border-top:1px solid var(--line);padding:22px 0 25px;background:#f5f5f7}.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:15px;font-size:10px;color:#77777e}.footer-inner .brand{font-size:14px;color:var(--ink)}.footer-inner .brand-mark{width:23px;height:23px;border-radius:7px;font-size:14px}.footer-note{font-size:10px;line-height:1.6;color:#88888e;margin-top:18px}
+@media(max-width:850px){.nav-links{gap:12px}.searchbox input{width:75px}.lead-grid{grid-template-columns:1fr;gap:35px}.latest-column{display:grid;grid-template-columns:1fr 1fr;column-gap:22px}.latest-column .section-kicker{grid-column:1/-1}.compact-story:nth-of-type(4){border:0}.market-strip{grid-template-columns:1fr 1fr}.market-intro{grid-column:1/-1}.newsletter{align-items:flex-start;flex-direction:column}.list-story{grid-template-columns:110px 1fr 30px}}
+@media(max-width:600px){.searchbox,.searchbox.searchbox-open{width:calc(100vw - 145px);opacity:1}.search-toggle{display:none}.sport-banner{grid-template-columns:1fr;gap:5px;padding:14px}.sport-banner strong{font-size:11px}.sport-banner small{font-size:9px}.wrap{width:90%}.top-line-inner{height:30px}.top-date{display:none}.nav{height:59px}.mobile-menu{display:grid}.nav-links{display:none;position:absolute;top:59px;left:0;right:0;background:rgba(251,251,253,.98);padding:14px 5% 18px;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;gap:3px}.nav-links.open{display:flex}.nav-link{text-align:left;padding:10px 0}.searchbox{padding:7px 9px}.searchbox input{width:78px}.intro{padding:60px 0 40px}.intro h1{font-size:51px}.intro-sub{font-size:13px;max-width:330px}.lead-grid{padding-bottom:35px}.lead-image{height:160px}.lead-copy{padding:21px}.lead-copy h2{font-size:26px}.latest-column{display:block}.compact-story{padding-bottom:17px;margin-bottom:17px}.section-title-row h2{font-size:27px}.list-story{grid-template-columns:1fr 30px;gap:10px;padding:19px 0}.list-category{grid-column:1/-1;font-size:10px}.list-main h3{font-size:16px}.list-main p{font-size:11px}.round-arrow{grid-column:2;grid-row:2}.market-strip{grid-template-columns:1fr;padding:22px;margin-bottom:45px}.market-intro{grid-column:auto}.market-placeholder{min-height:140px}.newsletter{padding:34px 0 40px}.newsletter h2{font-size:29px}.newsletter form{width:100%}.newsletter input{min-width:0;flex:1;width:50%}.newsletter form button{padding:12px}.source-status{align-items:flex-start;flex-direction:column}.footer-inner{flex-wrap:wrap}.footer-inner>span:nth-child(2){display:none}}
 
-const fallbackStories = [
-  { id: "demo1", title: "L’économie européenne scrute les prochains signaux de croissance", description: "Inflation, consommation et investissement restent au cœur des préoccupations des décideurs et des marchés.", source: "ÉcoPulse — exemple", category: "Europe", publishedAt: new Date().toISOString(), url: "" },
-  { id: "demo2", title: "Les entreprises réévaluent leurs priorités d’investissement", description: "Dans un environnement incertain, les dirigeants arbitrent entre innovation, productivité et maîtrise des coûts.", source: "ÉcoPulse — exemple", category: "Entreprises", publishedAt: new Date(Date.now()-3600000).toISOString(), url: "" },
-  { id: "demo3", title: "Les marchés attendent de nouveaux indicateurs macroéconomiques", description: "Les prochaines publications économiques pourraient influencer les anticipations de taux et les valorisations.", source: "ÉcoPulse — exemple", category: "Marchés", publishedAt: new Date(Date.now()-7200000).toISOString(), url: "" }
-];
-
-function App() {
-  const [articles, setArticles] = useState([]);
-  const [category, setCategory] = useState(() => window.location.hash === "#sport" ? "Sport" : "Toutes");
-  const [query, setQuery] = useState("");
-  const [updatedAt, setUpdatedAt] = useState(null);
-  const [sources, setSources] = useState([]);
-  const [errors, setErrors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const isSport = category === "Sport";
-
-  async function loadNews({ quiet = false } = {}) {
-    if (!quiet) setLoading(true);
-    try {
-      const params = new URLSearchParams({ limit: "60" });
-      if (category !== "Toutes") params.set("category", category);
-      if (query.trim()) params.set("q", query.trim());
-      const response = await fetch(`/api/news?${params}`);
-      if (!response.ok) throw new Error("API indisponible");
-      const data = await response.json();
-      setArticles(data.articles || []);
-      setUpdatedAt(data.updatedAt || new Date().toISOString());
-      setSources(data.sources || []);
-      setErrors(data.errors || []);
-      setIsDemo(false);
-    } catch {
-      setArticles(fallbackStories);
-      setUpdatedAt(new Date().toISOString());
-      setSources([]);
-      setErrors(["L'API locale n'est pas connectée. Les articles affichés sont des exemples."]);
-      setIsDemo(true);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    document.title = isSport ? "ÉcoPulse Sport — Actualité sportive" : "ÉcoPulse — Actualité économique";
-    if (isSport && window.location.hash !== "#sport") window.history.replaceState({}, "", "#sport");
-    if (!isSport && window.location.hash === "#sport") window.history.replaceState({}, "", "#");
-    loadNews();
-  }, [category]);
-  useEffect(() => {
-    const id = setTimeout(() => loadNews({ quiet: true }), 350);
-    return () => clearTimeout(id);
-  }, [query]);
-  useEffect(() => {
-    const id = setInterval(() => loadNews({ quiet: true }), 5 * 60 * 1000);
-    return () => clearInterval(id);
-  }, [category, query]);
-
-  const filtered = useMemo(() => articles, [articles]);
-  const lead = filtered[0];
-  const side = filtered.slice(1, 4);
-  const more = filtered.slice(4);
-
-  const categoryIcon = name => {
-    if (name === "Marchés") return <TrendingUp size={15}/>;
-    if (name === "Entreprises") return <Building2 size={15}/>;
-    if (name === "Monde") return <Globe2 size={15}/>;
-    return <Newspaper size={15}/>;
-  };
-
-  return <div className="app-shell">
-    <div className="topline"><div className="wrap top-line-inner">
-      <span>{isSport ? "LE BRIEF SPORTIF" : "LE BRIEF ÉCONOMIQUE"}</span><span className="top-date">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "full" }).format(new Date())}</span>
-      <span className="live-status"><i/> {isDemo ? "Mode aperçu" : "Flux connectés"}</span>
-    </div></div>
-    <header className="site-header"><div className="wrap nav">
-      <a className="brand" href="#"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a>
-      <nav className={mobileOpen ? "nav-links open" : "nav-links"}>
-        {CATEGORIES.map(c => <button key={c} className={category === c ? "nav-link active" : "nav-link"} onClick={() => {setCategory(c);setMobileOpen(false)}}>{c === "Toutes" ? "À la une" : c}</button>)}
-        <a className="nav-link market-nav-link market-nav-cta" href="/market" onClick={()=>setMobileOpen(false)}><span className="market-menu-dot"/> MARKET AI <span className="market-menu-arrow">↗</span></a><a className="nav-link nav-agency-link" href="/agence" onClick={()=>setMobileOpen(false)}>NOA STUDIO</a>
-      </nav>
-      <div className="nav-actions">
-        <button className="icon-btn search-toggle" aria-label="Rechercher" onClick={()=>setSearchOpen(v=>!v)}><Search size={17}/></button>
-        <label className={searchOpen || query ? "searchbox searchbox-open" : "searchbox"}><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={isSport ? "Chercher un sport…" : "Rechercher…"}/></label>
-        <button className="icon-btn mobile-menu" aria-label="Menu" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen ? <X size={19}/> : <Menu size={19}/>}</button>
-      </div>
-    </div></header>
-
-    <main className="wrap">
-      <section className="intro">
-        <p className="eyebrow">{isSport ? "L’ESSENTIEL DU SPORT, SANS LE BRUIT" : "L’ESSENTIEL, SANS LE BRUIT"}</p>
-        <h1>{isSport ? <>Le sport,<br/><span>en mouvement.</span></> : <>L’économie,<br/><span>en perspective.</span></>}</h1>
-        <p className="intro-sub">{isSport ? "Football, tennis, rugby, basket, cyclisme et les grands rendez-vous. L’actualité sportive, sélectionnée et contextualisée." : "Les actualités et les signaux qui comptent. Sélectionnés, contextualisés, expliqués."}</p>
-        <button className="hero-cta" onClick={()=>document.getElementById("fil")?.scrollIntoView({behavior:"smooth"})}>Voir les dernières actualités <ArrowRight size={15}/></button>
-      </section>
-
-      {isDemo && <div className="notice"><Wifi size={16}/><span><strong>Mode aperçu.</strong> Lance le serveur API pour charger les flux RSS réels. Les articles ci-dessous sont des exemples.</span></div>}
-      {isSport && !isDemo && <div className="sport-banner"><span>SPORT EN CONTINU</span><strong>Football · Tennis · Rugby · Basket · Cyclisme · F1</strong><small>Flux d’actualité mis à jour automatiquement.</small></div>}
-      {!isDemo && errors.length > 0 && <div className="notice"><Wifi size={16}/><span>Certains flux ne répondent pas. Les articles disponibles restent consultables.</span></div>}
-
-      <section className="lead-grid">
-        <div className="lead-column">
-          <div className="section-kicker"><span>À LA UNE</span><span className="rule"/></div>
-          {loading && !lead ? <div className="skeleton lead-skeleton"/> : lead ? <article className="lead-story">
-            <div className="lead-image"><div className="orb orb-one"/><div className="orb orb-two"/><span className="image-label">{isSport ? "SPORT / ACTUALITÉS" : "ÉCONOMIE / ANALYSE"}</span></div>
-            <div className="lead-copy">
-              <div className="meta">{lead.category || "Économie"} <span>·</span> {fmtDate(lead.publishedAt)}</div>
-              <h2>{lead.title}</h2>
-              <p>{lead.description || "Les dernières informations économiques et leurs implications."}</p>
-              <div className="story-footer"><span className="source-name">{lead.source}</span>{lead.url ? <a className="read-link" href={lead.url} target="_blank" rel="noreferrer">Lire l’article <ArrowUpRight size={15}/></a> : <span className="sample-label">Exemple éditorial</span>}</div>
-            </div>
-          </article> : <div className="empty">Aucun article ne correspond à cette recherche.</div>}
-        </div>
-        <aside className="latest-column">
-          <div className="section-kicker"><span>DERNIÈRES NOUVELLES</span><span className="rule"/></div>
-          {side.length ? side.map((story,i)=><article className="compact-story" key={story.id}>
-            <div className="compact-index">0{i+1}</div>
-            <div><div className="meta">{story.category || "Économie"} <span>·</span> {fmtDate(story.publishedAt)}</div>
-              <h3>{story.title}</h3><p>{story.description}</p>
-              {story.url && <a className="read-link" href={story.url} target="_blank" rel="noreferrer">Lire la source <ArrowRight size={13}/></a>}
-            </div>
-          </article>) : <p className="muted">Les nouvelles apparaîtront ici dès que les flux seront disponibles.</p>}
-        </aside>
-      </section>
-
-      <section className="feed-section" id="fil">
-        <div className="section-title-row"><div><p className="eyebrow">RESTER INFORMÉ</p><h2>{isSport ? "Le fil du sport" : "Le fil de l’économie"}</h2></div>
-          <button className="refresh-btn" onClick={()=>loadNews()} disabled={loading}><RefreshCw size={15} className={loading ? "spin" : ""}/> Actualiser</button>
-        </div>
-        <div className="filter-row">{(isSport ? SPORT_FILTERS : CATEGORIES).map(c => {
-          const active = isSport ? (c === "Tous les sports" ? !query : query.toLocaleLowerCase("fr") === c.toLocaleLowerCase("fr")) : category === c;
-          return <button key={c} className={active ? "filter active" : "filter"} onClick={() => {
-            if (isSport) setQuery(c === "Tous les sports" ? "" : c);
-            else setCategory(c);
-          }}>{c}</button>;
-        })}</div>
-        {more.length ? <div className="story-list">{more.map(story=><article className="list-story" key={story.id} onClick={() => story.url && window.open(story.url, "_blank", "noopener,noreferrer")}>
-          <div className="list-category">{categoryIcon(story.category)}<span>{story.category || "Économie"}</span></div>
-          <div className="list-main"><h3>{story.title}</h3><p>{story.description}</p><div className="list-meta">{story.source} <span>·</span> <Clock3 size={12}/> {fmtDate(story.publishedAt)}</div></div>
-          {story.url && <a className="round-arrow" href={story.url} target="_blank" rel="noreferrer" aria-label="Lire l'article"><ArrowUpRight size={18}/></a>}
-        </article>)}</div> : <div className="empty">{loading ? "Chargement des actualités…" : "Pas d’autres articles pour le moment. Essayez une autre catégorie ou recherche."}</div>}
-      </section>
-
-      {!isSport && <section className="market-strip">
-        <div className="market-intro"><p className="eyebrow">LES REPÈRES</p><h2>Les marchés,<br/>en un regard.</h2><p>Connectez un fournisseur de données financières pour afficher les cotations en direct.</p></div>
-        <div className="market-placeholder"><div className="market-symbol"><Landmark size={20}/></div><span className="market-title">Indicateurs de marché</span><strong>À connecter</strong><span className="market-foot">API financière requise pour les cours temps réel</span></div>
-        <div className="market-placeholder"><div className="market-symbol"><TrendingUp size={20}/></div><span className="market-title">Devises & matières premières</span><strong>À connecter</strong><span className="market-foot">Les cours peuvent être différés selon le fournisseur</span></div>
-      </section>}
-
-      <section className="newsletter">
-        <div><p className="eyebrow">LE BRIEF, DANS VOTRE BOÎTE MAIL</p><h2>Comprendre plus.<br/>Défiler moins.</h2><p>Une sélection claire des actualités qui comptent.</p></div>
-        <form onSubmit={e=>{e.preventDefault();alert("La newsletter sera activée après connexion à un service d’envoi.");}}><input type="email" placeholder="Adresse e-mail" required/><button type="submit">Être informé <ArrowRight size={15}/></button></form>
-      </section>
-
-      <section className="source-status">
-        <div><span className="status-dot"/><div><strong>Sources d’actualité</strong><p>{sources.length ? `${sources.filter(s=>s.status==="ok").length} flux disponibles` : "En attente de connexion à l’API"}</p></div></div>
-        <div className="updated">Dernière vérification : {updatedAt ? fmtDate(updatedAt) : "—"} <span>· Actualisation automatique toutes les 5 min</span></div>
-      </section>
-    </main>
-    <footer><div className="wrap footer-inner"><a className="brand" href="/"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a><span>{isSport ? "Le sport, expliqué simplement." : "L’économie, expliquée simplement."}</span><div className="footer-links"><a href="/agence">NOA STUDIO</a><a href="/agence/chat">Projet / Chat</a><span>© {new Date().getFullYear()} ÉcoPulse</span></div></div><div className="wrap footer-note">Les contenus sont fournis par des sources tierces. Vérifiez les informations auprès de l’éditeur original. Les données de marché nécessitent une source financière distincte.</div></footer>
-  </div>;
-}
+/* Agency landing page */
+.agency-page{background:#f7f7f4;color:#111;min-height:100vh;font-family:Manrope,DM Sans,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.agency-wrap{width:min(1160px,90%);margin:auto}.agency-nav{position:sticky;top:0;z-index:20;background:rgba(247,247,244,.88);backdrop-filter:blur(18px);border-bottom:1px solid #deded8}.agency-nav .agency-wrap{height:70px;display:flex;align-items:center;justify-content:space-between}.agency-logo{font-weight:800;letter-spacing:-.04em;font-size:15px}.agency-logo span{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:8px;background:#111;color:#fff;margin-right:8px}.agency-nav-links{display:flex;align-items:center;gap:27px;font-size:11px;color:#666}.agency-nav-links a:hover{color:#111}.agency-nav-cta{display:flex;align-items:center;gap:6px;background:#111;color:#fff!important;border-radius:999px;padding:10px 14px}.agency-hero{padding:100px 0 80px;background:linear-gradient(135deg,#f7f7f4 0%,#ecece5 100%);overflow:hidden}.agency-hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:center}.agency-eyebrow{font-size:9px;letter-spacing:.16em;font-weight:800;color:#777;margin:0 0 16px}.agency-hero h1,.agency-section h2{font-size:clamp(43px,6vw,76px);line-height:.98;letter-spacing:-.065em;margin:0;font-weight:750}.agency-hero h1 em{font-style:normal;color:#777}.agency-lead{font-size:15px;line-height:1.7;color:#686861;max-width:520px;margin:24px 0}.agency-actions{display:flex;gap:9px;align-items:center}.agency-primary,.agency-secondary{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:12px 16px;font-size:11px;font-weight:700}.agency-primary{background:#111;color:#fff}.agency-secondary{border:1px solid #d4d4ce}.agency-proof{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;color:#777;font-size:9px}.agency-visual{display:flex;justify-content:center}.browser-card{width:min(470px,100%);background:#fff;border:1px solid #d7d7d0;border-radius:18px;overflow:hidden;box-shadow:0 28px 70px rgba(0,0,0,.1);transform:rotate(1.5deg)}.browser-top{height:38px;border-bottom:1px solid #e8e8e2;display:flex;align-items:center;gap:5px;padding:0 13px;color:#aaa;font-size:9px}.browser-top i{width:7px;height:7px;border-radius:50%;background:#ddd}.browser-top span{margin-left:8px}.browser-content{height:310px;padding:45px;background:linear-gradient(135deg,#111,#333);color:#fff}.browser-content small{font-size:8px;letter-spacing:.15em;color:#aaa}.browser-content strong{display:block;font-size:42px;line-height:1;letter-spacing:-.06em;margin-top:35px}.browser-line{width:100px;height:1px;background:#777;margin:30px 0}.browser-pill{display:inline-block;border:1px solid #666;border-radius:99px;padding:10px 13px;font-size:9px}.agency-section{padding:110px 0}.agency-section h2{font-size:clamp(38px,5vw,60px)}.agency-services{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:70px;border-top:1px solid #d8d8d2}.agency-services article{padding:25px 25px 20px 0;border-right:1px solid #d8d8d2}.agency-services article:not(:first-child){padding-left:25px}.agency-services article:last-child{border-right:0}.agency-services b{font-size:10px;color:#999}.agency-services h3{font-size:22px;margin:35px 0 8px;letter-spacing:-.04em}.agency-services p{font-size:12px;color:#777;line-height:1.7;max-width:260px}.agency-dark{background:#121212;color:#fff}.agency-dark .agency-eyebrow{color:#888}.agency-dark h2{color:#fff}.agency-projects{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:60px}.agency-project{min-height:240px;padding:22px;background:#1c1c1c;border:1px solid #292929;border-radius:16px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;transition:transform .2s ease,border-color .2s ease}.agency-project:hover{transform:translateY(-4px);border-color:#555}.agency-project span{font-size:8px;letter-spacing:.13em;color:#888;position:absolute;top:20px}.agency-project strong{font-size:30px;letter-spacing:-.05em}.agency-project small{font-size:10px;color:#999;margin-top:5px}.agency-project svg{position:absolute;right:20px;bottom:20px}.agency-pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:60px}.agency-price{background:#fff;border:1px solid #dddcd6;border-radius:16px;padding:25px;position:relative}.agency-price.featured{border-color:#111;box-shadow:0 20px 50px rgba(0,0,0,.08)}.agency-badge{position:absolute;right:18px;top:18px;font-size:7px;letter-spacing:.1em;background:#111;color:#fff;border-radius:99px;padding:6px 8px}.agency-price>p{font-size:9px;letter-spacing:.14em;color:#888;font-weight:800}.agency-price>strong{display:block;font-size:40px;letter-spacing:-.06em;margin-top:25px}.agency-price>span{font-size:9px;color:#999}.agency-price h3{font-size:12px;line-height:1.6;font-weight:500;color:#666;min-height:60px;margin:18px 0}.agency-price ul{list-style:none;padding:16px 0;margin:0;border-top:1px solid #eee;min-height:140px}.agency-price li{font-size:10px;color:#555;padding:5px 0}.agency-price>a{display:flex;justify-content:center;align-items:center;gap:7px;background:#111;color:#fff;border-radius:999px;padding:11px;font-size:10px;font-weight:700}.agency-retainer{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:18px;padding:22px 25px;background:#e9e9e3;border-radius:15px}.agency-retainer p{font-size:8px;letter-spacing:.13em;color:#777;margin:0 0 4px}.agency-retainer strong{font-size:22px;letter-spacing:-.04em}.agency-retainer span{font-size:10px;color:#666}.agency-contact{background:#e9e9e3}.agency-contact-box{display:grid;grid-template-columns:1.2fr .8fr;gap:60px;align-items:center}.agency-contact h2{font-size:clamp(36px,5vw,57px)}.agency-contact>div>div>p:last-child{font-size:12px;line-height:1.7;color:#70706a;max-width:500px}.agency-contact-card{background:#111;color:#fff;border-radius:18px;padding:28px}.agency-contact-card strong{font-size:18px;letter-spacing:-.04em}.agency-contact-card p{font-size:10px;line-height:1.6;color:#aaa}.agency-contact-card a{display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;color:#111;border-radius:999px;padding:12px;font-size:10px;font-weight:700;margin-top:20px}.agency-footer{background:#111;color:#fff;padding:30px 0}.agency-footer .agency-wrap{display:flex;justify-content:space-between;align-items:center;gap:20px;font-size:9px;color:#999}.agency-footer strong{color:#fff}.agency-footer a{color:#fff}
+@media(max-width:800px){.agency-hero{padding:70px 0}.agency-hero-grid,.agency-contact-box{grid-template-columns:1fr;gap:45px}.agency-nav-links a:not(.agency-nav-cta){display:none}.agency-services,.agency-projects,.agency-pricing{grid-template-columns:1fr}.agency-services article,.agency-services article:not(:first-child){border-right:0;border-bottom:1px solid #d8d8d2;padding:24px 0}.agency-project{min-height:190px}.agency-price h3{min-height:auto}.agency-price ul{min-height:auto}.agency-retainer,.agency-footer .agency-wrap{align-items:flex-start;flex-direction:column}.browser-content{height:260px}.browser-content strong{font-size:35px}}
 
 
-function TradingViewChart({symbol="OANDA:XAUUSD", interval="1S", chartMode="candles"}) {
-  const container = useRef(null);
-  useEffect(() => {
-    if (!container.current) return;
-    container.current.innerHTML = "";
-    const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
-    script.type = "text/javascript";
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-      autosize: true, symbol, interval, timezone: "Europe/Paris", theme: "light",
-      style: chartMode === "line" ? "2" : "1", locale: "fr", allow_symbol_change: true, hide_side_toolbar: false,
-      withdateranges: true, save_image: false, calendar: false,
-      studies: ["RSI@tv-basicstudies", "MASimple@tv-basicstudies"],
-      support_host: "https://www.tradingview.com"
-    });
-    container.current.appendChild(script);
-    return () => { if (container.current) container.current.innerHTML = ""; };
-  }, [symbol, interval, chartMode]);
-  return <div className="tv-chart-wrap" ref={container}><div className="tv-loading">Chargement du graphique XAUUSD…</div></div>;
-}
+/* NOA STUDIO chat */
+.chat-page{min-height:100vh;background:#f4f3ee;display:grid;place-items:center;padding:30px 15px;font-family:Manrope,DM Sans,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#111}.chat-card{width:min(520px,100%);background:#fff;border:1px solid #deddd6;border-radius:24px;padding:34px;box-shadow:0 24px 70px rgba(0,0,0,.08)}.chat-back{font-size:10px;color:#777;display:inline-block;margin-bottom:35px}.chat-brand{width:42px;height:42px;background:#111;color:#fff;border-radius:12px;display:grid;place-items:center;font-weight:800;margin-bottom:35px}.chat-card h1{font-size:clamp(42px,8vw,62px);line-height:.94;letter-spacing:-.07em;margin:0}.chat-card h1 em{font-style:normal;color:#777}.chat-intro{font-size:12px;line-height:1.7;color:#777;max-width:400px;margin:18px 0 28px}.chat-form{display:grid;gap:13px}.chat-form label{font-size:10px;font-weight:700;color:#555;display:grid;gap:7px}.chat-form input{width:100%;border:1px solid #dddcd6;border-radius:12px;padding:13px 14px;outline:none;background:#fafaf8;font-size:12px}.chat-form input:focus{border-color:#999}.chat-form button{border:0;background:#111;color:#fff;border-radius:999px;padding:13px 17px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px}.chat-form button:disabled{opacity:.6}.chat-error{font-size:11px;color:#b3261e;margin:12px 0 0}.chat-shell{width:min(760px,100%);height:min(760px,calc(100vh - 60px));background:#fff;border:1px solid #deddd6;border-radius:22px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.09);display:grid;grid-template-rows:auto auto 1fr auto}.chat-header{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:16px 20px;border-bottom:1px solid #eee}.chat-brand-mini{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800}.chat-brand-mini span{display:grid;place-items:center;background:#111;color:#fff;width:25px;height:25px;border-radius:7px}.chat-header>div{display:flex;flex-direction:column;align-items:center}.chat-header strong{font-size:12px}.chat-header small{font-size:9px;color:#999;margin-top:3px}.chat-close{font-size:24px;color:#777}.chat-status{font-size:9px;color:#777;padding:9px 20px;background:#fafaf8;border-bottom:1px solid #eee}.chat-status span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#35a56d;margin-right:6px}.chat-messages{padding:22px;overflow:auto;display:flex;flex-direction:column;gap:10px;background:#fbfbf9}.chat-message{max-width:72%;display:flex;flex-direction:column;gap:4px}.chat-message>div{padding:11px 13px;border-radius:15px;font-size:12px;line-height:1.55}.chat-message small{font-size:8px;color:#aaa}.chat-message.client{align-self:flex-end;align-items:flex-end}.chat-message.client>div{background:#111;color:#fff;border-bottom-right-radius:5px}.chat-message.owner{align-self:flex-start;align-items:flex-start}.chat-message.owner>div{background:#e9e9e3;color:#111;border-bottom-left-radius:5px}.chat-empty{margin:auto;color:#999;font-size:11px;text-align:center}.chat-composer{display:flex;gap:8px;padding:13px;border-top:1px solid #eee;background:#fff}.chat-composer input{flex:1;border:1px solid #dddcd6;border-radius:999px;padding:12px 15px;outline:none;font-size:11px}.chat-composer button{width:40px;height:40px;border:0;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center}.chat-composer button:disabled{opacity:.35}.chat-admin{min-height:100vh;background:#f4f3ee;font-family:Manrope,DM Sans,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#111}.chat-admin>header{height:70px;background:#fff;border-bottom:1px solid #dddcd6;padding:0 5%;display:flex;align-items:center;justify-content:space-between}.chat-admin-grid{width:90%;max-width:1100px;height:calc(100vh - 110px);margin:20px auto;display:grid;grid-template-columns:300px 1fr;background:#fff;border:1px solid #dddcd6;border-radius:18px;overflow:hidden}.chat-list{border-right:1px solid #eee;overflow:auto}.chat-list button{display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:17px;border:0;border-bottom:1px solid #eee;background:#fff;text-align:left;gap:4px}.chat-list button:hover,.chat-list button.selected{background:#f3f3ee}.chat-list strong{font-size:12px}.chat-list span{font-size:9px;color:#888}.chat-list small{font-size:9px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}.chat-list>p{font-size:11px;color:#999;padding:20px}.chat-admin-window{display:grid;grid-template-rows:auto 1fr auto;min-width:0}.chat-admin-title{padding:17px 20px;border-bottom:1px solid #eee;display:flex;flex-direction:column;gap:4px}.chat-admin-title strong{font-size:13px}.chat-admin-title span{font-size:9px;color:#999}
+@media(max-width:650px){.chat-card{padding:26px;border-radius:18px}.chat-shell{height:calc(100vh - 30px);border-radius:18px}.chat-admin-grid{grid-template-columns:1fr;height:calc(100vh - 90px)}.chat-list{display:none}.chat-admin>header strong{font-size:11px}.chat-message{max-width:85%}}
 
-function TradingViewCalendar() {
-  const container = useRef(null);
-  useEffect(() => {
-    if (!container.current) return;
-    container.current.innerHTML = "";
-    const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-events.js";
-    script.type = "text/javascript";
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-      colorTheme: "light", isTransparent: true, locale: "fr",
-      countryFilter: "us,eu,gb,fr,de,cn,jp", importanceFilter: "-1,0,1",
-      width: "100%", height: "100%"
-    });
-    container.current.appendChild(script);
-    return () => { if (container.current) container.current.innerHTML = ""; };
-  }, []);
-  return <div className="tv-calendar-wrap" ref={container}><div className="tv-loading">Chargement du calendrier…</div></div>;
-}
+/* Unified NOA STUDIO / ÉcoPulse navigation */
+.nav-agency-link{font-weight:700!important;color:#111!important;border-left:1px solid var(--line);padding-left:15px!important}
+.nav-agency-link:hover{color:var(--blue)!important}
+.footer-links{display:flex;align-items:center;gap:12px}
+.footer-links a{color:#666}
+.footer-links a:hover{color:#111}
+@media(max-width:600px){.nav-agency-link{border-left:0;padding-left:0!important}.footer-links{width:100%;flex-wrap:wrap;gap:8px 12px}}
 
-function MarketAIPage() {
-  const [news, setNews] = useState([]);
-  const [updated, setUpdated] = useState(null);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [refreshing, setRefreshing] = useState(false);
-  const [marketData, setMarketData] = useState(null);
-  const [marketError, setMarketError] = useState("");
-  const [timeframe, setTimeframe] = useState("5");
-  const [chartMode, setChartMode] = useState("candles");
-  const [simOrder, setSimOrder] = useState(null);
-  const [virtualBalance, setVirtualBalance] = useState(10000);
-  const [volume, setVolume] = useState(0.10);
-  const [sl, setSl] = useState(0);
-  const [tp, setTp] = useState(0);
-  const [positions, setPositions] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [accountTab, setAccountTab] = useState("positions");
-  const [marketOpen, setMarketOpen] = useState(false);
+.agency-admin-link{font-size:10px;color:#666;border:1px solid #d4d4ce;border-radius:999px;padding:9px 12px}
+.agency-admin-link:hover{color:#111;border-color:#aaa}
+@media(max-width:800px){.agency-admin-link{display:none}}
 
-  async function loadMarketData() {
-    try {
-      const r = await fetch("/api/market/xauusd");
-      const data = await r.json();
-      if (!r.ok || !data.ok) throw new Error(data.error || "Flux marché indisponible");
-      setMarketData(data);
-      setMarketError("");
-    } catch (error) {
-      setMarketError(error.message || "Flux marché indisponible");
-    }
-  }
+/* Market AI */
+.market-page{min-height:100vh;background:#f6f6f3;color:#151515;font-family:Manrope,DM Sans,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.market-wrap{width:min(1240px,92%);margin:auto}.market-header{position:sticky;top:0;z-index:30;background:rgba(246,246,243,.9);backdrop-filter:blur(18px);border-bottom:1px solid #deded7}.market-nav{height:68px;display:flex;align-items:center;justify-content:space-between}.market-brand{font-weight:800;letter-spacing:-.05em;font-size:16px}.market-brand span{color:#8a8a84;font-weight:500}.market-nav-actions{display:flex;align-items:center;gap:20px;font-size:10px;color:#777}.market-nav-actions a.active{color:#111;font-weight:800}.market-nav-actions button{border:1px solid #d6d6cf;background:#fff;border-radius:999px;padding:9px 13px;font-size:10px}.market-hero{padding:72px 0 42px;display:flex;justify-content:space-between;gap:30px;align-items:end}.market-eyebrow,.market-panel-head>div>span,.market-watch>div>span{font-size:9px;letter-spacing:.15em;font-weight:800;color:#85857f}.market-hero h1{font-size:clamp(44px,6vw,72px);line-height:.96;letter-spacing:-.07em;margin:14px 0}.market-hero h1 em{font-style:normal;color:#777}.market-hero p{font-size:13px;color:#777;line-height:1.7;max-width:580px}.market-live-pill{font-size:9px;font-weight:800;border:1px solid #d7d7d0;background:#fff;border-radius:999px;padding:10px 13px;white-space:nowrap}.market-live-pill i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#27a66d;margin-right:6px}.market-grid-top{display:grid;grid-template-columns:1.7fr .7fr;gap:14px}.market-chart-card,.market-coach-card,.market-news-panel,.market-calendar-panel{background:#fff;border:1px solid #deded7;border-radius:18px;overflow:hidden}.market-card-head{height:62px;display:flex;justify-content:space-between;align-items:center;padding:0 18px;border-bottom:1px solid #ededeb}.market-card-head span{display:block;font-size:11px;font-weight:800}.market-card-head strong{font-size:8px;color:#999;letter-spacing:.12em}.market-bias{font-size:8px;font-weight:900;border-radius:999px;padding:7px 10px;background:#f0f0ed}.market-bias.up{background:#e8f5ee;color:#187448}.market-bias.down{background:#fae9e7;color:#a13a31}.tv-chart-wrap{height:520px;position:relative}.tv-calendar-wrap{height:430px;position:relative}.tv-loading{position:absolute;inset:0;display:grid;place-items:center;color:#999;font-size:11px}.market-coach-card{padding:21px;display:flex;flex-direction:column}.coach-top{display:flex;justify-content:space-between;font-size:9px;font-weight:800;color:#777}.coach-top b{font-size:8px;padding:4px 7px;border-radius:999px;background:#111;color:#fff}.coach-score{display:flex;align-items:end;margin-top:35px}.coach-score strong{font-size:68px;letter-spacing:-.09em;line-height:.8}.coach-score span{font-size:11px;color:#999;margin:0 0 5px 5px}.coach-bias{font-size:11px;color:#777;margin:15px 0 25px}.coach-bias b{color:#111}.coach-bars{display:grid;gap:13px}.coach-bars>div{display:grid;gap:6px;font-size:9px;color:#777}.coach-bars i{display:block;height:5px;background:#ededeb;border-radius:99px;overflow:hidden}.coach-bars i b{display:block;height:100%;background:#1d1d1f;border-radius:99px}.coach-note{font-size:9px;color:#999;line-height:1.55;margin:22px 0}.coach-form{display:flex;gap:6px;margin-top:auto}.coach-form input{min-width:0;flex:1;border:1px solid #dddcd6;background:#fafaf8;border-radius:999px;padding:10px 12px;font-size:9px;outline:none}.coach-form button{width:34px;border:0;border-radius:50%;background:#111;color:#fff}.coach-answer{font-size:9px;line-height:1.55;background:#f0f0eb;border-radius:12px;padding:11px;margin-top:10px}.market-panels{display:grid;grid-template-columns:1.35fr .65fr;gap:14px;margin-top:14px}.market-panel-head{display:flex;justify-content:space-between;align-items:end;padding:22px 20px;border-bottom:1px solid #ededeb}.market-panel-head h2{font-size:24px;letter-spacing:-.05em;margin:7px 0 0}.market-panel-head small{font-size:8px;color:#999}.market-news-list article{display:grid;grid-template-columns:35px 1fr 24px;gap:13px;padding:16px 20px;border-bottom:1px solid #efefed}.market-news-index{font-size:9px;color:#aaa}.market-news-list b{font-size:11px;line-height:1.4}.market-news-list p{font-size:9px;line-height:1.5;color:#85857f;margin:5px 0}.market-news-list small{font-size:8px;color:#aaa}.market-news-list a{font-size:16px;color:#777}.market-empty{padding:30px;color:#999;font-size:10px}.market-watch{margin:14px 0;padding:28px 20px;background:#191919;color:#fff;border-radius:18px;display:grid;grid-template-columns:.7fr 1.3fr;gap:30px;align-items:center}.market-watch h2{font-size:27px;letter-spacing:-.05em;margin:8px 0}.market-watch>div>span{color:#999}.watch-items{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.watch-items>div{background:#242424;border:1px solid #303030;border-radius:11px;padding:14px}.watch-items b{display:block;font-size:11px}.watch-items span{display:block;font-size:8px;color:#999;margin:4px 0 15px}.watch-items strong{font-size:8px;color:#ccc}.market-disclaimer{display:flex;gap:14px;padding:18px 0 35px;color:#888;font-size:9px;line-height:1.6}.market-disclaimer strong{color:#555;white-space:nowrap}.market-nav-link{font-weight:800!important;color:#111!important}.market-nav-link:hover{color:#356da8!important}@media(max-width:900px){.market-grid-top,.market-panels,.market-watch{grid-template-columns:1fr}.market-watch{gap:20px}.watch-items{grid-template-columns:repeat(3,1fr)}.market-coach-card{min-height:430px}}@media(max-width:600px){.market-nav-actions a{display:none}.market-hero{padding:50px 0 30px;display:block}.market-live-pill{display:inline-block;margin-top:20px}.tv-chart-wrap{height:430px}.tv-calendar-wrap{height:390px}.watch-items{grid-template-columns:repeat(2,1fr)}.market-panel-head h2{font-size:20px}.market-disclaimer{flex-direction:column;gap:5px}}
 
-  async function loadMarketNews() {
-    setRefreshing(true);
-    try {
-      const r = await fetch("/api/news?category=Marchés&limit=16");
-      const data = await r.json();
-      setNews(data.articles || []);
-      setUpdated(data.updatedAt || new Date().toISOString());
-    } catch {
-      setNews([]);
-      setUpdated(new Date().toISOString());
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
-  useEffect(() => {
-    const updateMarketStatus = () => {
-      const now = new Date();
-      const day = new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", weekday:"short"}).format(now);
-      const hour = Number(new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", hour:"2-digit", hour12:false}).format(now));
-      const minute = Number(new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", minute:"2-digit"}).format(now));
-      const total = hour * 60 + minute;
-      const isWeekend = day === "Sat" || day === "Sun";
-      setMarketOpen(!isWeekend && total >= 60 && total < 1439);
-    };
-    updateMarketStatus();
-    const statusId = setInterval(updateMarketStatus, 30000);
-    document.title = "Market AI — XAUUSD & marchés";
-    loadMarketNews();
-    loadMarketData();
-    const newsId = setInterval(loadMarketNews, 5 * 60 * 1000);
-    const marketId = setInterval(loadMarketData, 15 * 1000);
-    return () => { clearInterval(newsId); clearInterval(marketId); clearInterval(statusId); };
-  }, []);
-
-  const signal = useMemo(() => {
-    const text = news.map(n => (n.title || "") + " " + (n.description || "")).join(" ").toLowerCase();
-    const bullish = ["gold", "or", "fed", "rate cut", "taux", "safe haven", "geopolit"].filter(k => text.includes(k)).length;
-    const bearish = ["strong dollar", "higher yields", "hausse des rendements", "rate hike", "taux élevé"].filter(k => text.includes(k)).length;
-    const macro = 62 + bullish * 3 - bearish * 4;
-    const technical = marketData?.technical?.bias === "HAUSSIER" ? 8 : marketData?.technical?.bias === "BAISSIER" ? -8 : 0;
-    const rsiAdjust = marketData?.technical?.rsi14 > 70 ? -5 : marketData?.technical?.rsi14 < 30 ? 5 : 0;
-    const score = Math.max(35, Math.min(85, macro + technical + rsiAdjust));
-    const bias = marketData?.technical?.bias || (score >= 65 ? "HAUSSIER" : score <= 55 ? "BAISSIER" : "NEUTRE");
-    return {score, bias};
-  }, [news, marketData]);
-
-  function openSimPosition(side) {
-    const price = marketData?.price;
-    if (!price) return;
-    const id = Date.now();
-    const position = { id, side, entry: price, volume: Number(volume) || 0.10, sl: Number(sl) || 0, tp: Number(tp) || 0, openedAt: new Date().toISOString() };
-    setPositions(p => [position, ...p]);
-    setSimOrder(side);
-  }
-  function closeSimPosition(position) {
-    const price = marketData?.price || position.entry;
-    const direction = position.side === "ACHAT" ? 1 : -1;
-    const pnl = (price - position.entry) * direction * position.volume * 100;
-    setVirtualBalance(b => b + pnl);
-    setPositions(p => p.filter(x => x.id !== position.id));
-    setHistory(h => [{...position, exit: price, pnl, closedAt: new Date().toISOString()}, ...h].slice(0, 20));
-  }
-  const openPnl = positions.reduce((sum,p) => sum + ((marketData?.price || p.entry) - p.entry) * (p.side === "ACHAT" ? 1 : -1) * p.volume * 100, 0);
-  const equity = virtualBalance + openPnl;
-  function askCoach(e) {
-    e.preventDefault();
-    const q = question.trim().toLowerCase();
-    if (!q) return;
-    if (q.includes("acheter") || q.includes("vendre") || q.includes("entrer")) {
-      setAnswer("Coach : ne prends pas une décision uniquement à partir d’un signal. Vérifie d’abord la tendance, la structure, la volatilité et le calendrier économique. Attends une confirmation sur ton unité de temps.");
-    } else if (q.includes("or") || q.includes("xau")) {
-      setAnswer(`Coach : XAU/USD est à ${marketData?.price ? marketData.price.toFixed(2) : "—"} USD. Biais technique ${marketData?.technical?.bias?.toLowerCase() || "indisponible"}, RSI ${marketData?.technical?.rsi14 ? marketData.technical.rsi14.toFixed(1) : "—"}, score contextuel ${signal.score}/100. C’est un contexte pédagogique, pas une recommandation d’achat ou de vente.`);
-    } else {
-      setAnswer("Coach : commence par regarder XAUUSD en M15 puis H1. Identifie la tendance, les derniers sommets/creux et les événements économiques à venir avant de chercher une entrée.");
-    }
-  }
-
-  return <div className="market-page">
-    <header className="market-header"><div className="market-wrap market-nav">
-      <a className="market-brand" href="/">ÉcoPulse <span>/ MARKET AI</span></a>
-      <div className="market-nav-actions"><a href="/">Actualités</a><a className="active" href="/market">Marchés</a><a href="/#sport">Sport</a><button onClick={loadMarketNews} disabled={refreshing}>{refreshing ? "Actualisation…" : "↻ Actualiser"}</button></div>
-    </div></header>
-    <main className="market-wrap">
-      <section className="market-hero"><div>
-        <p className="market-eyebrow">TERMINAL MARCHÉ · TEMPS RÉEL</p>
-        <h1>Comprendre le marché<br/><em>avant d’agir.</em></h1>
-        <p>Graphique XAUUSD, actualités économiques, calendrier et coaching dans un seul espace.</p>
-      </div><div className="market-live-pill"><i/> {marketData ? "API CONNECTÉE · XAU/USD" : "CONNEXION API EN COURS"}</div></section>
-
-      <section className="market-grid-top">
-        <div className="market-chart-card">
-          <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR · XAU/USD</strong></div><div className="market-price-box"><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong><span className={marketData?.percentChange >= 0 ? "positive" : "negative"}>{marketData?.percentChange != null ? `${marketData.percentChange >= 0 ? "+" : ""}${marketData.percentChange.toFixed(2)}%` : "—"}</span><small>{marketData ? "LIVE API" : "OFFLINE"}</small></div><div className={`market-bias ${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}`}>{signal.bias}</div></div>
-          <div className="mt5-chart-toolbar"><div className="mt5-timeframes">{[["1","M1"],["5","M5"],["15","M15"],["30","M30"],["60","H1"],["240","H4"]].map(([value,label]) => <button key={value} className={timeframe===value ? "active" : ""} onClick={()=>setTimeframe(value)}>{label}</button>)}</div><div className="mt5-tools"><button className={chartMode==="candles"?"active-tool":""} onClick={()=>setChartMode("candles")}>◧</button><button className={chartMode==="line"?"active-tool":""} onClick={()=>setChartMode("line")}>╱</button><button onClick={()=>setChartMode("crosshair")}>⌖</button></div></div><TradingViewChart interval={timeframe} chartMode={chartMode} /><div className="mt5-order-strip"><div><span>SIMULATION</span><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong></div><button onClick={()=>setSimOrder("ACHAT")} className="sim-buy">ACHAT</button><button onClick={()=>setSimOrder("VENTE")} className="sim-sell">VENTE</button></div>{simOrder && <div className="sim-order-note">Ordre <b>{simOrder}</b> simulé uniquement · aucune transaction réelle.</div>}<div className="mt5-account"><div className="mt5-account-head"><div><span>COMPTE DE DÉMO</span><strong>€ {equity.toFixed(2)}</strong></div><div className="mt5-account-stats"><span>Balance <b>€ {virtualBalance.toFixed(2)}</b></span><span>Equity <b>€ {equity.toFixed(2)}</b></span><span>P&L <b className={openPnl>=0?"pnl-positive":"pnl-negative"}>{openPnl>=0?"+":""}€ {openPnl.toFixed(2)}</b></span></div></div><div className="mt5-order-form"><label>Volume<select value={volume} onChange={e=>setVolume(e.target.value)}><option>0.01</option><option>0.10</option><option>0.50</option><option>1.00</option></select></label><label>SL<input type="number" value={sl} onChange={e=>setSl(e.target.value)} placeholder="Optionnel"/></label><label>TP<input type="number" value={tp} onChange={e=>setTp(e.target.value)} placeholder="Optionnel"/></label><button className="sim-buy" onClick={()=>openSimPosition("ACHAT")}>ACHAT</button><button className="sim-sell" onClick={()=>openSimPosition("VENTE")}>VENTE</button></div><div className="mt5-account-tabs"><button className={accountTab==="positions"?"active":""} onClick={()=>setAccountTab("positions")}>Positions ({positions.length})</button><button className={accountTab==="history"?"active":""} onClick={()=>setAccountTab("history")}>Historique ({history.length})</button></div><div className="mt5-account-list">{accountTab==="positions" ? (positions.length ? positions.map(p=><div className="mt5-position" key={p.id}><div><b className={p.side==="ACHAT"?"buy-text":"sell-text"}>{p.side} XAUUSD</b><small>{p.volume.toFixed(2)} lot · entrée {p.entry.toFixed(2)}</small></div><strong className={((marketData?.price||p.entry)-p.entry)*(p.side==="ACHAT"?1:-1)>=0?"pnl-positive":"pnl-negative"}>{(((marketData?.price||p.entry)-p.entry)*(p.side==="ACHAT"?1:-1)*p.volume*100)>=0?"+":""}€ {(((marketData?.price||p.entry)-p.entry)*(p.side==="ACHAT"?1:-1)*p.volume*100).toFixed(2)}</strong><button onClick={()=>closeSimPosition(p)}>Fermer</button></div>) : <p>Aucune position ouverte.</p>) : (history.length ? history.map(h=><div className="mt5-position" key={h.id}><div><b>{h.side} XAUUSD</b><small>{h.volume.toFixed(2)} lot · {h.entry.toFixed(2)} → {h.exit.toFixed(2)}</small></div><strong className={h.pnl>=0?"pnl-positive":"pnl-negative"}>{h.pnl>=0?"+":""}€ {h.pnl.toFixed(2)}</strong><span>Fermée</span></div>) : <p>Aucun trade simulé.</p>)}</div></div>
-        </div>
-        <aside className="market-coach-card">
-          <div className="coach-top"><span>🤖 COACH MARKET AI</span><b>V1</b></div>
-          <div className="coach-score"><strong>{signal.score}</strong><span>/ 100</span></div>
-          <p className="coach-bias">Biais contextuel : <b>{signal.bias}</b></p>
-          <div className="coach-bars"><div><span>Contexte macro</span><i><b style={{width: signal.score + "%"}}/></i></div><div><span>Risque événementiel</span><i><b style={{width: Math.max(25, 100 - signal.score / 2) + "%"}}/></i></div></div>
-          <div className="coach-context"><span>TECHNIQUE</span><b>{marketData?.technical?.bias || "—"} · RSI {marketData?.technical?.rsi14 ? marketData.technical.rsi14.toFixed(1) : "—"}</b><span>PRIX XAU/USD</span><b>{marketData?.price ? marketData.price.toFixed(2) + " $" : "—"}</b><span>MACRO</span><b>NEWS + CALENDRIER</b><span>DONNÉES</span><b>{marketData ? "API CONNECTÉE" : "EN ATTENTE"}</b></div><p className="coach-note">Le coach croise le contexte des news et du calendrier avec les éléments techniques affichés sur le graphique. Il sert à t’entraîner et ne constitue pas un signal garanti.</p>
-          <form className="coach-form" onSubmit={askCoach}><input value={question} onChange={e=>setQuestion(e.target.value)} placeholder="Pose une question au coach…"/><button>→</button></form>
-          {answer && <div className="coach-answer">{answer}</div>}
-        </aside>
-      </section>
-
-      <section className="market-panels">
-        <div className="market-news-panel">
-          <div className="market-panel-head"><div><span>ACTUALITÉS QUI COMPTENT</span><h2>Le marché maintenant</h2></div><small>{updated ? "Mis à jour à " + new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(new Date(updated)) : "—"}</small></div>
-          <div className="market-news-list">{news.length ? news.slice(0,8).map((n,i)=><article key={n.id || i}><div className="market-news-index">0{i+1}</div><div><b>{n.title}</b><p>{n.description || "Voir la source pour le contexte complet."}</p><small>{n.source || "Source"} · {n.publishedAt ? fmtDate(n.publishedAt) : "—"}</small></div>{n.url && <a href={n.url} target="_blank" rel="noreferrer">↗</a>}</article>) : <div className="market-empty">Les actualités apparaîtront ici lorsque le flux économique sera disponible.</div>}</div>
-        </div>
-        <aside className="market-calendar-panel"><div className="market-panel-head"><div><span>MACRO</span><h2>Calendrier économique</h2></div></div><TradingViewCalendar /></aside>
-      </section>
-
-      <section className="market-watch"><div><span>WATCHLIST</span><h2>Les repères à surveiller</h2></div><div className="watch-items">
-        <div><b>XAUUSD</b><span>Or</span><strong>Graphique</strong></div><div><b>DXY</b><span>Dollar</span><strong>Contexte</strong></div><div><b>US10Y</b><span>Rendement US</span><strong>Contexte</strong></div><div><b>NAS100</b><span>Technologie US</span><strong>Risque</strong></div><div><b>WTI</b><span>Pétrole</span><strong>Inflation</strong></div>
-      </div></section>
-      <section className="market-disclaimer"><strong>Important</strong><span>Market AI est un outil d’information et d’entraînement. Il ne fournit pas de conseil financier personnalisé et ne garantit aucun résultat. Les données de marché peuvent dépendre des conditions et du fournisseur.</span></section>
-    </main>
-  </div>;
-}
-
-function AgencyPage() {
-  const offers = [
-    {name:"STARTER", price:"499 €", text:"Un site propre, rapide et professionnel pour être crédible en ligne.", items:["Jusqu’à 5 pages","Design responsive","Formulaire de contact","SEO local de base","Mise en ligne"]},
-    {name:"PRO", price:"799 €", text:"Le pack recommandé pour transformer les visiteurs en clients.", items:["Tout le Starter","Prise de rendez-vous","Avis clients","Google Maps & réseaux","SEO local renforcé"]},
-    {name:"PREMIUM", price:"999 €", text:"Une présence complète avec une expérience plus travaillée.", items:["Tout le Pro","Animations premium","Pages sur mesure","Suivi analytics","Optimisations mensuelles"]},
-  ];
-  return <div className="agency-page">
-    <div className="agency-nav"><div className="agency-wrap"><a className="agency-logo" href="/agence"><span>n.</span> NOA STUDIO</a><a className="agency-ecopulse-back" href="/">← ÉcoPulse</a><div className="agency-nav-links"><a href="/">ÉcoPulse</a><a href="/#sport">Sport</a><a href="#services">Services</a><a href="#portfolio">Portfolio</a><a href="#tarifs">Tarifs</a><a className="agency-admin-link" href="/agence/messages">Messages</a><a className="agency-nav-cta" href="/agence/chat">Parler du projet <ArrowRight size={14}/></a></div></div></div>
-    <main>
-      <section className="agency-hero"><div className="agency-wrap agency-hero-grid"><div><p className="agency-eyebrow">STUDIO WEB · FRANCE</p><h1>Des sites qui donnent<br/><em>envie de vous choisir.</em></h1><p className="agency-lead">Je crée des sites modernes, rapides et pensés pour transformer une présence en ligne en vrais contacts clients.</p><div className="agency-actions"><a className="agency-primary" href="#contact">Créer mon site <ArrowRight size={15}/></a><a className="agency-secondary" href="#portfolio">Voir les réalisations</a></div><div className="agency-proof"><span>✓ Design sur mesure</span><span>✓ Mobile-first</span><span>✓ Mise en ligne incluse</span></div></div><div className="agency-visual"><div className="browser-card"><div className="browser-top"><i/><i/><i/><span>votre-entreprise.fr</span></div><div className="browser-content"><small>VOTRE MARQUE</small><strong>Une présence qui<br/>fait la différence.</strong><div className="browser-line"/><div className="browser-pill">Prendre rendez-vous →</div></div></div></div></div></section>
-      <section className="agency-section" id="services"><div className="agency-wrap"><p className="agency-eyebrow">CE QUE JE FAIS</p><h2>Simple pour vous.<br/>Puissant pour vos clients.</h2><div className="agency-services"><article><b>01</b><h3>Création</h3><p>Un site pensé autour de votre activité, de vos clients et de votre image.</p></article><article><b>02</b><h3>Conversion</h3><p>Des appels à l’action clairs, des formulaires et des parcours qui donnent envie de passer à l’action.</p></article><article><b>03</b><h3>Visibilité</h3><p>Structure SEO locale, performance mobile et fondations techniques propres.</p></article></div></div></section>
-      <section className="agency-section agency-dark" id="portfolio"><div className="agency-wrap"><p className="agency-eyebrow">PORTFOLIO</p><h2>Des démos prêtes à<br/>devenir vos prochains projets.</h2><div className="agency-projects"><a href="/" className="agency-project"><span>01 · MÉDIA</span><strong>ÉcoPulse</strong><small>Actualité économique & sportive</small><ArrowUpRight size={18}/></a><div className="agency-project"><span>02 · FITNESS</span><strong>Iron House</strong><small>Concept de site pour salle de sport</small><ArrowUpRight size={18}/></div><div className="agency-project"><span>03 · BEAUTÉ</span><strong>Studio 13</strong><small>Concept de site pour professionnel local</small><ArrowUpRight size={18}/></div></div></div></section>
-      <section className="agency-section" id="tarifs"><div className="agency-wrap"><p className="agency-eyebrow">OFFRES</p><h2>Un prix clair.<br/>Pas de mauvaise surprise.</h2><div className="agency-pricing">{offers.map((o,i)=><article className={i===1?"agency-price featured":"agency-price"} key={o.name}>{i===1&&<span className="agency-badge">LE PLUS CHOISI</span>}<p>{o.name}</p><strong>{o.price}</strong><span>à partir de</span><h3>{o.text}</h3><ul>{o.items.map(x=><li key={x}>✓ {x}</li>)}</ul><a href="#contact">Choisir cette offre <ArrowRight size={14}/></a></article>)}</div><div className="agency-retainer"><div><p>MAINTENANCE</p><strong>49 €/mois</strong></div><span>Modifications, surveillance, petites améliorations et suivi du site.</span></div></div></section>
-      <section className="agency-section agency-contact" id="contact"><div className="agency-wrap agency-contact-box"><div><p className="agency-eyebrow">VOTRE PROJET</p><h2>On transforme votre idée<br/>en site cette semaine.</h2><p>Expliquez simplement votre activité. La première discussion sert à définir le besoin et le bon format.</p></div><div className="agency-contact-card"><strong>Prêt à commencer ?</strong><p>Remplacez ce bouton par votre e-mail, WhatsApp ou Calendly avant de prospecter.</p><a href="/agence/chat">Discuter de mon projet <ArrowRight size={15}/></a></div></div></section>
-    </main>
-    <footer className="agency-footer"><div className="agency-wrap"><strong>n. NOA STUDIO</strong><span>Sites web modernes pour entreprises ambitieuses.</span><div><a href="/">ÉcoPulse</a><span> · </span><a href="/#sport">Sport</a><span> · </span><a href="/agence/chat">Chat projet</a><span> · </span><a href="/agence/messages">Espace admin</a></div></div></footer>
-  </div>;
-}
+/* Market AI primary navigation */
+.market-nav-cta{display:inline-flex!important;align-items:center;gap:7px!important;background:#111!important;color:#fff!important;border-radius:999px!important;padding:9px 13px!important;font-weight:800!important;box-shadow:0 6px 18px rgba(0,0,0,.12)}.market-nav-cta:hover{background:#2a5f91!important;color:#fff!important;transform:translateY(-1px)}.market-menu-dot{width:6px;height:6px;border-radius:50%;background:#54d58d;box-shadow:0 0 0 3px rgba(84,213,141,.15)}.market-menu-arrow{font-size:12px;opacity:.7}.coach-context{display:grid;grid-template-columns:1fr auto;gap:7px 10px;padding:12px;background:#f5f5f1;border-radius:12px;font-size:8px}.coach-context span{color:#999;font-weight:700}.coach-context b{text-align:right;font-size:8px}.market-live-pill{box-shadow:0 8px 22px rgba(0,0,0,.04)}@media(max-width:600px){.market-nav-cta{display:flex!important;margin-top:8px}.nav-links.open .market-nav-cta{width:max-content}.market-menu-arrow{display:none}}
 
 
-function ChatPage() {
-  const [conversation, setConversation] = useState(null);
-  const [form, setForm] = useState({name:"", email:""});
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+/* Live Market API */
+.market-price-box{display:flex;align-items:center;gap:8px;margin-left:auto;margin-right:10px}.market-price-box strong{font-size:15px;letter-spacing:-.03em}.market-price-box span{font-size:9px;font-weight:800}.market-price-box span.positive{color:#197448}.market-price-box span.negative{color:#a13a31}.market-price-box small{font-size:7px;color:#999;letter-spacing:.08em}.market-api-status{font-size:8px;color:#999;line-height:1.5;margin:7px 0 0}.market-api-status::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:#39a66f;margin-right:5px}@media(max-width:600px){.market-price-box{margin-left:0}.market-card-head{gap:7px}.market-price-box strong{font-size:12px}.market-price-box small{display:none}}
 
-  async function startChat(e) {
-    e.preventDefault();
-    setLoading(true); setError("");
-    try {
-      const response = await fetch("/api/chat/start", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(form)});
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Impossible de démarrer la discussion.");
-      localStorage.setItem("noaChatId", data.id);
-      setConversation(data);
-    } catch (err) { setError(err.message); }
-    finally { setLoading(false); }
-  }
+/* MetaTrader-inspired mobile market chart */
+.mt5-chart-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid #ededeb;background:#fafaf8}.mt5-timeframes,.mt5-tools{display:flex;align-items:center;gap:4px}.mt5-timeframes button,.mt5-tools span{height:28px;min-width:31px;padding:0 8px;border:1px solid transparent;background:transparent;border-radius:6px;font-size:9px;color:#777;font-weight:800}.mt5-timeframes button:hover{background:#f0f0eb;color:#111}.mt5-timeframes button.active{background:#111;color:#fff}.mt5-tools{color:#888}.mt5-tools span{display:grid;place-items:center;min-width:28px;padding:0;border-color:#e5e5df;background:#fff}.tv-chart-wrap{height:540px;background:#fff}.market-chart-card{box-shadow:0 8px 28px rgba(0,0,0,.035)}
+@media(max-width:600px){.market-wrap{width:100%}.market-header .market-nav{width:92%}.market-chart-card{border-radius:14px;border-left:0;border-right:0}.market-card-head{height:58px;padding:0 12px}.mt5-chart-toolbar{padding:7px 9px;position:sticky;top:0;z-index:2}.mt5-timeframes{overflow-x:auto;scrollbar-width:none}.mt5-timeframes::-webkit-scrollbar{display:none}.mt5-timeframes button{min-width:38px}.mt5-tools span:nth-child(2),.mt5-tools span:nth-child(3){display:none}.tv-chart-wrap{height:520px}.market-grid-top{gap:10px}.market-price-box{flex-wrap:wrap;justify-content:flex-end;max-width:145px}.market-bias{display:none}}
 
-  async function loadConversation(id) {
-    const response = await fetch("/api/chat/" + id);
-    if (!response.ok) { localStorage.removeItem("noaChatId"); return; }
-    setConversation(await response.json());
-  }
+/* MT5 mobile terminal controls */
+.mt5-tools button{height:28px;min-width:28px;padding:0;border:1px solid #e5e5df;background:#fff;border-radius:6px;color:#777;font-size:11px;font-weight:800}.mt5-tools button.active-tool{background:#111;color:#fff;border-color:#111}.mt5-order-strip{display:grid;grid-template-columns:1fr 78px 78px;gap:6px;padding:8px 10px;background:#191919;color:#fff;border-top:1px solid #303030}.mt5-order-strip>div{display:flex;align-items:center;gap:8px;min-width:0}.mt5-order-strip span{font-size:7px;color:#8f8f8f;font-weight:800;letter-spacing:.12em}.mt5-order-strip strong{font-size:10px}.mt5-order-strip button{border:0;border-radius:6px;color:#fff;font-size:8px;font-weight:900;height:30px}.sim-buy{background:#267b52}.sim-sell{background:#a3443b}.sim-order-note{padding:7px 10px;background:#f0f0eb;color:#777;font-size:8px;text-align:center;border-bottom:1px solid #e6e6e1}.sim-order-note b{color:#111}@media(max-width:600px){.mt5-order-strip{grid-template-columns:1fr 70px 70px;padding:7px 9px}.mt5-order-strip>div{gap:6px}.mt5-order-strip span{display:none}.mt5-order-strip strong{font-size:9px}.mt5-tools button{min-width:26px}.sim-order-note{font-size:7px}}
 
-  useEffect(() => {
-    const id = localStorage.getItem("noaChatId");
-    if (id) loadConversation(id);
-  }, []);
+/* Full MT5-style virtual account panel */
+.mt5-account{background:#121212;color:#fff;border-top:1px solid #292929}.mt5-account-head{display:flex;justify-content:space-between;gap:12px;padding:15px 12px;border-bottom:1px solid #292929}.mt5-account-head>div:first-child{display:flex;flex-direction:column;gap:5px}.mt5-account-head span{font-size:7px;color:#888;letter-spacing:.12em;font-weight:800}.mt5-account-head strong{font-size:20px;letter-spacing:-.04em}.mt5-account-stats{display:flex;gap:15px;align-items:center}.mt5-account-stats span{font-size:7px;color:#777;display:flex;flex-direction:column;gap:3px}.mt5-account-stats b{font-size:8px;color:#ddd}.pnl-positive{color:#49c98a!important}.pnl-negative{color:#f0796e!important}.mt5-order-form{display:grid;grid-template-columns:1fr 1fr 1fr 76px 76px;gap:6px;padding:10px 12px;border-bottom:1px solid #292929}.mt5-order-form label{display:flex;flex-direction:column;gap:5px;font-size:7px;color:#888;text-transform:uppercase;font-weight:800}.mt5-order-form input,.mt5-order-form select{height:31px;border:1px solid #333;background:#202020;color:#fff;border-radius:6px;padding:0 8px;font-size:9px;outline:none}.mt5-order-form button{border:0;border-radius:6px;color:#fff;font-size:8px;font-weight:900}.mt5-account-tabs{display:flex;border-bottom:1px solid #292929}.mt5-account-tabs button{flex:1;border:0;border-bottom:2px solid transparent;background:transparent;color:#777;padding:10px;font-size:8px;font-weight:800}.mt5-account-tabs button.active{color:#fff;border-bottom-color:#fff}.mt5-account-list{max-height:180px;overflow:auto}.mt5-account-list>p{padding:16px 12px;color:#777;font-size:8px;text-align:center}.mt5-position{display:grid;grid-template-columns:1fr auto auto;gap:9px;align-items:center;padding:11px 12px;border-bottom:1px solid #242424}.mt5-position>div{display:flex;flex-direction:column;gap:4px;min-width:0}.mt5-position b{font-size:8px}.mt5-position small,.mt5-position span{font-size:7px;color:#777}.buy-text{color:#49c98a}.sell-text{color:#f0796e}.mt5-position>strong{font-size:9px}.mt5-position button{border:1px solid #444;background:#1d1d1d;color:#bbb;border-radius:5px;padding:6px 8px;font-size:7px;font-weight:800}@media(max-width:600px){.mt5-account-head{padding:12px 9px;display:block}.mt5-account-stats{justify-content:space-between;margin-top:10px;gap:7px}.mt5-order-form{grid-template-columns:1fr 1fr 1fr 1fr 1fr;padding:8px 9px}.mt5-order-form button{height:31px}.mt5-account-list{max-height:165px}.mt5-position{padding:10px 9px}.mt5-position button{padding:5px 7px}}
 
-  useEffect(() => {
-    if (!conversation?.id) return;
-    const timer = setInterval(() => loadConversation(conversation.id), 2500);
-    return () => clearInterval(timer);
-  }, [conversation?.id]);
-
-  async function sendMessage(e) {
-    e.preventDefault();
-    const value = text.trim();
-    if (!value || !conversation) return;
-    setText("");
-    const response = await fetch("/api/chat/" + conversation.id + "/messages", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({sender:"client", text:value})
-    });
-    if (response.ok) loadConversation(conversation.id);
-  }
-
-  if (!conversation) return <div className="chat-page"><div className="chat-card chat-start-card">
-    <a className="chat-back" href="/">← ÉcoPulse · NOA STUDIO</a>
-    <div className="chat-brand">n.</div>
-    <p className="agency-eyebrow">DISCUSSION PROJET</p>
-    <h1>Parlons de<br/><em>votre projet.</em></h1>
-    <p className="chat-intro">Laissez vos coordonnées et ouvrez directement une conversation avec NOA STUDIO.</p>
-    <form onSubmit={startChat} className="chat-form">
-      <label>Votre nom<input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Ex. Thomas Martin" required/></label>
-      <label>Votre e-mail<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="vous@email.com" required/></label>
-      <button disabled={loading}>{loading ? "Ouverture…" : "Démarrer la discussion"} <ArrowRight size={15}/></button>
-    </form>
-    {error && <p className="chat-error">{error}</p>}
-  </div></div>;
-
-  return <div className="chat-page"><div className="chat-shell">
-    <header className="chat-header"><a href="/" className="chat-brand-mini"><span>n.</span> NOA STUDIO · ÉcoPulse</a><div><strong>{conversation.name}</strong><small>{conversation.email}</small></div><a href="/" className="chat-close">×</a></header>
-    <div className="chat-status"><span/> Conversation privée · Réponse de Noa</div>
-    <div className="chat-messages">{conversation.messages.length ? conversation.messages.map(message =>
-      <div key={message.id} className={"chat-message " + (message.sender === "client" ? "client" : "owner")}><div>{message.text}</div><small>{new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(new Date(message.createdAt))}</small></div>
-    ) : <div className="chat-empty">Écris ton premier message pour présenter ton projet.</div>}</div>
-    <form className="chat-composer" onSubmit={sendMessage}><input value={text} onChange={e=>setText(e.target.value)} placeholder="Écris ton message…" autoComplete="off"/><button disabled={!text.trim()} aria-label="Envoyer"><ArrowRight size={18}/></button></form>
-  </div></div>;
-}
-
-function ChatAdminPage() {
-  const [key, setKey] = useState(() => sessionStorage.getItem("noaAdminKey") || "");
-  const [authorized, setAuthorized] = useState(false);
-  const [conversations, setConversations] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [text, setText] = useState("");
-  const [error, setError] = useState("");
-
-  async function refresh() {
-    const response = await fetch("/api/chat-admin/conversations", {headers:{"x-admin-key":key}});
-    if (!response.ok) { setAuthorized(false); setError("Clé administrateur incorrecte."); return; }
-    const data = await response.json();
-    setAuthorized(true); setError(""); setConversations(data);
-    if (selected) {
-      const current = data.find(x=>x.id===selected.id);
-      if (current) setSelected(current);
-    } else if (data[0]) setSelected(data[0]);
-  }
-
-  useEffect(() => { if (key) refresh(); }, []);
-
-  useEffect(() => {
-    if (!authorized) return;
-    const timer = setInterval(refresh, 2500);
-    return () => clearInterval(timer);
-  }, [authorized, key, selected?.id]);
-
-  async function login(e) {
-    e.preventDefault();
-    sessionStorage.setItem("noaAdminKey", key);
-    await refresh();
-  }
-
-  async function reply(e) {
-    e.preventDefault();
-    if (!selected || !text.trim()) return;
-    const value = text.trim(); setText("");
-    await fetch("/api/chat/" + selected.id + "/messages", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sender:"owner",text:value})});
-    await refresh();
-  }
-
-  if (!authorized) return <div className="chat-page"><div className="chat-card chat-start-card">
-    <a className="chat-back" href="/">← ÉcoPulse · NOA STUDIO</a><div className="chat-brand">n.</div>
-    <p className="agency-eyebrow">ESPACE NOA STUDIO</p><h1>Messages<br/><em>clients.</em></h1>
-    <form onSubmit={login} className="chat-form"><label>Clé administrateur<input type="password" value={key} onChange={e=>setKey(e.target.value)} placeholder="Votre clé" required/></label><button>Ouvrir les conversations <ArrowRight size={15}/></button></form>
-    {error && <p className="chat-error">{error}</p>}
-  </div></div>;
-
-  return <div className="chat-admin"><header><a href="/" className="chat-brand-mini"><span>n.</span> NOA STUDIO · ÉcoPulse</a><strong>Conversations clients</strong><a href="/" className="chat-close">×</a></header>
-    <div className="chat-admin-grid"><aside className="chat-list">{conversations.length ? conversations.map(c=><button key={c.id} className={selected?.id===c.id?"selected":""} onClick={()=>setSelected(c)}><strong>{c.name}</strong><span>{c.email}</span><small>{c.messages.at(-1)?.text || "Nouvelle conversation"}</small></button>) : <p>Aucune conversation pour le moment.</p>}</aside>
-      <section className="chat-admin-window">{selected ? <><div className="chat-admin-title"><strong>{selected.name}</strong><span>{selected.email}</span></div><div className="chat-messages">{selected.messages.map(message=><div key={message.id} className={"chat-message " + (message.sender === "owner" ? "owner" : "client")}><div>{message.text}</div><small>{new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(new Date(message.createdAt))}</small></div>)}</div><form className="chat-composer" onSubmit={reply}><input value={text} onChange={e=>setText(e.target.value)} placeholder="Répondre au client…"/><button disabled={!text.trim()}><ArrowRight size={18}/></button></form></> : <div className="chat-empty">Sélectionne une conversation.</div>}</section>
-    </div>
-  </div>;
-}
-
-const root = createRoot(document.getElementById("root"));
-root.render(window.location.pathname === "/market" ? <MarketAIPage /> : window.location.pathname === "/agence" ? <AgencyPage /> : window.location.pathname === "/agence/chat" ? <ChatPage /> : window.location.pathname === "/agence/messages" ? <ChatAdminPage /> : <App />);
+.market-live-pill.market-open{color:#187448;border-color:#bfe4cf;background:#edf9f2}.market-live-pill.market-open i{background:#27a66d}.market-live-pill.market-closed{color:#a13a31;border-color:#efd0cc;background:#fff3f1}.market-live-pill.market-closed i{background:#d9574d}
