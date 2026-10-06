@@ -95,7 +95,7 @@ function App() {
       <a className="brand" href="#"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a>
       <nav className={mobileOpen ? "nav-links open" : "nav-links"}>
         {CATEGORIES.map(c => <button key={c} className={category === c ? "nav-link active" : "nav-link"} onClick={() => {setCategory(c);setMobileOpen(false)}}>{c === "Toutes" ? "À la une" : c}</button>)}
-        <a className="nav-link market-nav-link" href="/market" onClick={()=>setMobileOpen(false)}>MARKET AI</a><a className="nav-link nav-agency-link" href="/agence" onClick={()=>setMobileOpen(false)}>NOA STUDIO</a>
+        <a className="nav-link market-nav-link market-nav-cta" href="/market" onClick={()=>setMobileOpen(false)}><span className="market-menu-dot"/> MARKET AI <span className="market-menu-arrow">↗</span></a><a className="nav-link nav-agency-link" href="/agence" onClick={()=>setMobileOpen(false)}>NOA STUDIO</a>
       </nav>
       <div className="nav-actions">
         <button className="icon-btn search-toggle" aria-label="Rechercher" onClick={()=>setSearchOpen(v=>!v)}><Search size={17}/></button>
@@ -283,7 +283,7 @@ function MarketAIPage() {
         <p className="market-eyebrow">TERMINAL MARCHÉ · TEMPS RÉEL</p>
         <h1>Comprendre le marché<br/><em>avant d’agir.</em></h1>
         <p>Graphique XAUUSD, actualités économiques, calendrier et coaching dans un seul espace.</p>
-      </div><div className="market-live-pill"><i/> DONNÉES MARCHÉ LIVE</div></section>
+      </div><div className="market-live-pill"><i/> GRAPHIQUE LIVE · NEWS · MACRO</div></section>
 
       <section className="market-grid-top">
         <div className="market-chart-card">
@@ -295,7 +295,7 @@ function MarketAIPage() {
           <div className="coach-score"><strong>{signal.score}</strong><span>/ 100</span></div>
           <p className="coach-bias">Biais contextuel : <b>{signal.bias}</b></p>
           <div className="coach-bars"><div><span>Contexte macro</span><i><b style={{width: signal.score + "%"}}/></i></div><div><span>Risque événementiel</span><i><b style={{width: Math.max(25, 100 - signal.score / 2) + "%"}}/></i></div></div>
-          <p className="coach-note">Analyse automatique basée sur les actualités disponibles. Ce score est pédagogique et ne constitue pas un signal de trading.</p>
+          <div className="coach-context"><span>TECHNIQUE</span><b>M15 · H1</b><span>MACRO</span><b>NEWS + CALENDRIER</b><span>RISQUE</span><b>CONFIRMATION REQUISE</b></div><p className="coach-note">Le coach croise le contexte des news et du calendrier avec les éléments techniques affichés sur le graphique. Il sert à t’entraîner et ne constitue pas un signal garanti.</p>
           <form className="coach-form" onSubmit={askCoach}><input value={question} onChange={e=>setQuestion(e.target.value)} placeholder="Pose une question au coach…"/><button>→</button></form>
           {answer && <div className="coach-answer">{answer}</div>}
         </aside>
