@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ArrowRight, ArrowUpRight, Clock3, Search, RefreshCw, TrendingUp,
-  Newspaper, Globe2, Building2, Landmark, Menu, X, Wifi
+  Newspaper, Globe2, Building2, Landmark, Menu, X, Wifi,
+  CalendarDays, MapPin, Dumbbell, Scissors, Check, Star, Instagram, Phone
 } from "lucide-react";
 import "./style.css";
 
@@ -391,11 +392,134 @@ function AgencyPage() {
     <main>
       <section className="agency-hero"><div className="agency-wrap agency-hero-grid"><div><p className="agency-eyebrow">STUDIO WEB · FRANCE</p><h1>Des sites qui donnent<br/><em>envie de vous choisir.</em></h1><p className="agency-lead">Je crée des sites modernes, rapides et pensés pour transformer une présence en ligne en vrais contacts clients.</p><div className="agency-actions"><a className="agency-primary" href="#contact">Créer mon site <ArrowRight size={15}/></a><a className="agency-secondary" href="#portfolio">Voir les réalisations</a></div><div className="agency-proof"><span>✓ Design sur mesure</span><span>✓ Mobile-first</span><span>✓ Mise en ligne incluse</span></div></div><div className="agency-visual"><div className="browser-card"><div className="browser-top"><i/><i/><i/><span>votre-entreprise.fr</span></div><div className="browser-content"><small>VOTRE MARQUE</small><strong>Une présence qui<br/>fait la différence.</strong><div className="browser-line"/><div className="browser-pill">Prendre rendez-vous →</div></div></div></div></div></section>
       <section className="agency-section" id="services"><div className="agency-wrap"><p className="agency-eyebrow">CE QUE JE FAIS</p><h2>Simple pour vous.<br/>Puissant pour vos clients.</h2><div className="agency-services"><article><b>01</b><h3>Création</h3><p>Un site pensé autour de votre activité, de vos clients et de votre image.</p></article><article><b>02</b><h3>Conversion</h3><p>Des appels à l’action clairs, des formulaires et des parcours qui donnent envie de passer à l’action.</p></article><article><b>03</b><h3>Visibilité</h3><p>Structure SEO locale, performance mobile et fondations techniques propres.</p></article></div></div></section>
-      <section className="agency-section agency-dark" id="portfolio"><div className="agency-wrap"><p className="agency-eyebrow">PORTFOLIO</p><h2>Des démos prêtes à<br/>devenir vos prochains projets.</h2><div className="agency-projects"><a href="/" className="agency-project"><span>01 · MÉDIA</span><strong>ÉcoPulse</strong><small>Actualité économique & sportive</small><ArrowUpRight size={18}/></a><div className="agency-project"><span>02 · FITNESS</span><strong>Iron House</strong><small>Concept de site pour salle de sport</small><ArrowUpRight size={18}/></div><div className="agency-project"><span>03 · BEAUTÉ</span><strong>Studio 13</strong><small>Concept de site pour professionnel local</small><ArrowUpRight size={18}/></div></div></div></section>
+      <section className="agency-section agency-dark" id="portfolio"><div className="agency-wrap"><p className="agency-eyebrow">PORTFOLIO</p><h2>Des démos prêtes à<br/>devenir vos prochains projets.</h2><div className="agency-projects"><a href="/" className="agency-project"><span>01 · MÉDIA</span><strong>ÉcoPulse</strong><small>Actualité économique & sportive</small><ArrowUpRight size={18}/></a><a href="/agence/iron-house" className="agency-project agency-project-link"><span>02 · FITNESS</span><strong>Iron House</strong><small>Concept de site pour salle de sport</small><ArrowUpRight size={18}/></a><a href="/agence/studio-13" className="agency-project agency-project-link"><span>03 · BEAUTÉ</span><small>Concept de site pour professionnel local</small><ArrowUpRight size={18}/></a></div></div></section>
       <section className="agency-section" id="tarifs"><div className="agency-wrap"><p className="agency-eyebrow">OFFRES</p><h2>Un prix clair.<br/>Pas de mauvaise surprise.</h2><div className="agency-pricing">{offers.map((o,i)=><article className={i===1?"agency-price featured":"agency-price"} key={o.name}>{i===1&&<span className="agency-badge">LE PLUS CHOISI</span>}<p>{o.name}</p><strong>{o.price}</strong><span>à partir de</span><h3>{o.text}</h3><ul>{o.items.map(x=><li key={x}>✓ {x}</li>)}</ul><a href="#contact">Choisir cette offre <ArrowRight size={14}/></a></article>)}</div><div className="agency-retainer"><div><p>MAINTENANCE</p><strong>49 €/mois</strong></div><span>Modifications, surveillance, petites améliorations et suivi du site.</span></div></div></section>
       <section className="agency-section agency-contact" id="contact"><div className="agency-wrap agency-contact-box"><div><p className="agency-eyebrow">VOTRE PROJET</p><h2>On transforme votre idée<br/>en site cette semaine.</h2><p>Expliquez simplement votre activité. La première discussion sert à définir le besoin et le bon format.</p></div><div className="agency-contact-card"><strong>Prêt à commencer ?</strong><p>Remplacez ce bouton par votre e-mail, WhatsApp ou Calendly avant de prospecter.</p><a href="/agence/chat">Discuter de mon projet <ArrowRight size={15}/></a></div></div></section>
     </main>
     <footer className="agency-footer"><div className="agency-wrap"><strong>n. NOA STUDIO</strong><span>Sites web modernes pour entreprises ambitieuses.</span><div><a href="/">ÉcoPulse</a><span> · </span><a href="/#sport">Sport</a><span> · </span><a href="/agence/chat">Chat projet</a><span> · </span><a href="/agence/messages">Espace admin</a></div></div></footer>
+  </div>;
+}
+
+
+function ProjectDemoPage({ type }) {
+  const isFitness = type === "iron-house";
+  const data = isFitness ? {
+    name: "Iron House", category: "FITNESS · CONCEPT DIGITAL", eyebrow: "IRON HOUSE · FITNESS CLUB",
+    title: <>Plus fort.<br/><em>Plus loin.</em></>,
+    lead: "Un site pensé pour une salle de sport moderne : énergie, performance et réservation en quelques secondes.",
+    primary: "Réserver une séance", secondary: "Explorer le concept", icon: <Dumbbell size={18}/>,
+    location: "Aubagne · Marseille", hours: "06:00 — 23:00", accent: "iron",
+    services: [
+      {title:"Musculation", text:"Un espace complet pour construire votre routine et progresser à votre rythme.", tag:"FORCE"},
+      {title:"Coaching", text:"Des séances personnalisées avec un suivi simple et motivant.", tag:"COACHING"},
+      {title:"Cours collectifs", text:"Des sessions dynamiques pour garder le rythme et l’envie.", tag:"GROUP"}
+    ],
+    gallery: [
+      {label:"01 · CLUB", title:"Une identité qui donne envie d’entrer", text:"Une direction visuelle sombre, énergique et premium pour mettre la salle au centre.", visual:"club"},
+      {label:"02 · PLANNING", title:"Réserver sans chercher", text:"Le planning devient une action claire : choisir, réserver, venir.", visual:"schedule"},
+      {label:"03 · PERFORMANCE", title:"Le progrès au premier regard", text:"Des chiffres et des objectifs mis en avant sans surcharger l’expérience.", visual:"performance"}
+    ],
+    stats:[["24/7","Accès membres"],["+40","Machines"],["7j/7","Ouvert"],["100%","Motivation"]],
+    quote:"Votre prochaine séance commence ici."
+  } : {
+    name: "Studio 13", category: "BEAUTÉ · CONCEPT DIGITAL", eyebrow: "STUDIO 13 · BEAUTY STUDIO",
+    title: <>Votre beauté,<br/><em>votre signature.</em></>,
+    lead: "Une expérience digitale élégante pour présenter vos prestations, inspirer confiance et faciliter les rendez-vous.",
+    primary: "Prendre rendez-vous", secondary: "Explorer le concept", icon: <Scissors size={18}/>,
+    location: "Aubagne · Provence", hours: "09:00 — 19:00", accent: "beauty",
+    services: [
+      {title:"Coiffure", text:"Une présentation éditoriale des coupes, couleurs et transformations.", tag:"HAIR"},
+      {title:"Beauté", text:"Vos prestations sont mises en scène avec une expérience douce et premium.", tag:"BEAUTY"},
+      {title:"Réservation", text:"Un parcours court pour passer de l’inspiration au rendez-vous.", tag:"BOOKING"}
+    ],
+    gallery: [
+      {label:"01 · STUDIO", title:"Une vitrine qui reflète votre univers", text:"Une direction claire, lumineuse et élégante pour valoriser votre savoir-faire.", visual:"studio"},
+      {label:"02 · SERVICES", title:"Chaque prestation trouve sa place", text:"Les services sont lisibles, comparables et faciles à réserver.", visual:"services"},
+      {label:"03 · RENDEZ-VOUS", title:"Le clic qui transforme", text:"Un parcours pensé pour convertir une visite en prise de rendez-vous.", visual:"booking"}
+    ],
+    stats:[["4.9/5","Avis clients"],["+12","Prestations"],["6j/7","Ouvert"],["100%","Sur mesure"]],
+    quote:"Votre prochain rendez-vous commence ici."
+  };
+
+  const [activeService, setActiveService] = useState(0);
+  const [activeGallery, setActiveGallery] = useState(0);
+  const selectedService = data.services[activeService];
+  const selectedGallery = data.gallery[activeGallery];
+
+  useEffect(() => {
+    document.title = data.name + " — Démo NOA STUDIO";
+    window.scrollTo({top:0, behavior:"instant"});
+  }, [data.name]);
+
+  return <div className={"project-page project-" + data.accent}>
+    <header className="project-nav">
+      <div className="project-wrap project-nav-inner">
+        <a className="project-brand" href="/agence"><span>n.</span> NOA STUDIO</a>
+        <div className="project-nav-links">
+          <a href="/agence">← Portfolio</a><a href="#concept">Concept</a><a href="#services">Services</a><a href="#experience">Expérience</a>
+        </div>
+        <a className="project-nav-cta" href={"/agence/chat?project=" + type}>Parler du projet <ArrowRight size={14}/></a>
+      </div>
+    </header>
+
+    <main>
+      <section className="project-hero">
+        <div className="project-wrap project-hero-grid">
+          <div className="project-hero-copy">
+            <p className="project-eyebrow"><span>{data.icon}</span>{data.eyebrow}</p>
+            <h1>{data.title}</h1>
+            <p className="project-lead">{data.lead}</p>
+            <div className="project-actions">
+              <a className="project-primary" href={"/agence/chat?project=" + type}>{data.primary} <ArrowRight size={15}/></a>
+              <a className="project-secondary" href="#concept">{data.secondary}</a>
+            </div>
+            <div className="project-location"><span><MapPin size={14}/>{data.location}</span><span><Clock3 size={14}/>{data.hours}</span></div>
+          </div>
+          <div className="project-hero-visual">
+            <div className="project-browser">
+              <div className="project-browser-top"><i/><i/><i/><span>{type}.fr</span></div>
+              <div className="project-browser-body">
+                <small>{data.category}</small><strong>{isFitness ? "Train hard." : "Be your best."}</strong>
+                <p>{isFitness ? "Un espace pour se dépasser." : "Une expérience pensée pour vous."}</p>
+                <div className="project-browser-buttons"><span>{isFitness ? "Voir les cours" : "Nos prestations"}</span><b>→</b></div>
+                <div className="project-browser-grid"><i/><i/><i/></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="project-intro" id="concept"><div className="project-wrap">
+        <div className="project-section-head"><p className="project-eyebrow">LE CONCEPT</p><h2>Un site qui ressemble<br/><em>à la marque.</em></h2></div>
+        <div className="project-intro-grid"><p>Chaque détail est pensé pour donner une première impression forte, rendre l’information immédiate et guider naturellement vers l’action.</p>
+          <div className="project-stats">{data.stats.map(([value,label])=><div key={label}><strong>{value}</strong><span>{label}</span></div>)}</div>
+        </div>
+      </div></section>
+
+      <section className="project-services" id="services"><div className="project-wrap">
+        <div className="project-section-head"><p className="project-eyebrow">EXPÉRIENCE</p><h2>Tout ce dont vos clients<br/><em>ont besoin.</em></h2></div>
+        <div className="project-service-layout">
+          <div className="project-service-tabs">{data.services.map((service,index)=><button key={service.title} className={index===activeService?"active":""} onClick={()=>setActiveService(index)}><span>0{index+1}</span><strong>{service.title}</strong><small>{service.tag}</small><ArrowRight size={15}/></button>)}</div>
+          <div className="project-service-detail" key={selectedService.title}><span>{selectedService.tag}</span><h3>{selectedService.title}</h3><p>{selectedService.text}</p><div className="project-detail-line"><Check size={15}/> Parcours simple et responsive</div><div className="project-detail-line"><Check size={15}/> Pensé pour convertir les visiteurs</div><a href={"/agence/chat?project=" + type + "&service=" + encodeURIComponent(selectedService.title)}>Construire ce projet <ArrowUpRight size={15}/></a></div>
+        </div>
+      </div></section>
+
+      <section className="project-experience" id="experience"><div className="project-wrap">
+        <div className="project-section-head"><p className="project-eyebrow">APERÇU DU SITE</p><h2>Choisissez une vue.<br/><em>Explorez le rendu.</em></h2></div>
+        <div className="project-gallery-tabs">{data.gallery.map((item,index)=><button key={item.label} className={index===activeGallery?"active":""} onClick={()=>setActiveGallery(index)}>{item.label}</button>)}</div>
+        <div className="project-gallery" key={selectedGallery.visual}>
+          <div className={"project-gallery-visual visual-" + selectedGallery.visual}><div className="project-gallery-window"><small>{data.name.toUpperCase()}</small><strong>{selectedGallery.title}</strong><span>{selectedGallery.text}</span><div className="project-gallery-ui"><i/><i/><i/><i/></div></div></div>
+          <div className="project-gallery-copy"><span>{selectedGallery.label}</span><h3>{selectedGallery.title}</h3><p>{selectedGallery.text}</p><a href={"/agence/chat?project=" + type}>Demander cette version <ArrowRight size={14}/></a></div>
+        </div>
+      </div></section>
+
+      <section className="project-cta"><div className="project-wrap project-cta-inner">
+        <div><p className="project-eyebrow">PRÊT À LE TRANSFORMER EN VRAI SITE ?</p><h2>{data.quote}</h2><p>Ce concept peut être adapté à votre activité, votre identité et vos objectifs.</p></div>
+        <a className="project-primary" href={"/agence/chat?project=" + type}>{data.primary} <ArrowRight size={15}/></a>
+      </div></section>
+    </main>
+
+    <footer className="project-footer"><div className="project-wrap"><a href="/agence">NOA STUDIO</a><span>Démo interactive · {data.name}</span><a href={"/agence/chat?project=" + type}>Parler du projet ↗</a></div></footer>
   </div>;
 }
 
@@ -529,4 +653,4 @@ function ChatAdminPage() {
 }
 
 const root = createRoot(document.getElementById("root"));
-root.render(window.location.pathname === "/market" ? <MarketAIPage /> : window.location.pathname === "/agence" ? <AgencyPage /> : window.location.pathname === "/agence/chat" ? <ChatPage /> : window.location.pathname === "/agence/messages" ? <ChatAdminPage /> : <App />);
+root.render(window.location.pathname === "/market" ? <MarketAIPage /> : window.location.pathname === "/agence" ? <AgencyPage /> : window.location.pathname === "/agence/iron-house" ? <ProjectDemoPage type="iron-house" /> : window.location.pathname === "/agence/studio-13" ? <ProjectDemoPage type="studio-13" /> : window.location.pathname === "/agence/chat" ? <ChatPage /> : window.location.pathname === "/agence/messages" ? <ChatAdminPage /> : <App />);
