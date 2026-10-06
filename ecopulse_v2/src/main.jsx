@@ -306,7 +306,7 @@ function MarketAIPage() {
 
       <section className="market-grid-top">
         <div className="market-chart-card">
-          <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR</strong></div><div className="market-price-box"><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong><span className={marketData?.percentChange >= 0 ? "positive" : "negative"}>{marketData?.percentChange != null ? \`\${marketData.percentChange >= 0 ? "+" : ""}\${marketData.percentChange.toFixed(2)}%\` : "—"}</span><small>{marketData ? "LIVE API" : "OFFLINE"}</small></div><div className={\`market-bias \${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}\`}>{signal.bias}</div></div>
+          <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR</strong></div><div className="market-price-box"><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong><span className={marketData?.percentChange >= 0 ? "positive" : "negative"}>{marketData?.percentChange != null ? `${marketData.percentChange >= 0 ? "+" : ""}${marketData.percentChange.toFixed(2)}%` : "—"}</span><small>{marketData ? "LIVE API" : "OFFLINE"}</small></div><div className={`market-bias ${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}`}>{signal.bias}</div></div>
           <TradingViewChart />
         </div>
         <aside className="market-coach-card">
