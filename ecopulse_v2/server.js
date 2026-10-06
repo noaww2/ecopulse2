@@ -123,6 +123,130 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+
+const marketCache = new Map();
+const MARKET_TTL = 12000;
+
+function marketNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function ema(values, period) {
+  if (!values.length) return null;
+  const k = 2 / (period + 1);
+  let current = values[0];
+  for (let i = 1; i < values.length; i++) current = values[i] * k + current * (1 - k);
+  return current;
+}
+
+function rsi(values, period = 14) {
+  if (values.length <= period) return null;
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const d = values[i] - values[i - 1];
+    if (d >= 0) gains += d; else losses -= d;
+  }
+  let avgGain = gains / period;
+  let avgLoss = losses / period;
+  for (let i = period + 1; i < values.length; i++) {
+    const d = values[i] - values[i - 1];
+    const gain = Math.max(0, d);
+    const loss = Math.max(0, -d);
+    avgGain = (avgGain * (period - 1) + gain) / period;
+    avgLoss = (avgLoss * (period - 1) + loss) / period;
+  }
+  if (avgLoss === 0) return 100;
+  return 100 - (100 / (1 + avgGain / avgLoss));
+}
+
+async function twelveData(pathname, params = {}) {
+  if (!process.env.TWELVE_DATA_API_KEY) {
+    const error = new Error("TWELVE_DATA_API_KEY manquante");
+    error.code = "MISSING_API_KEY";
+    throw error;
+  }
+  const url = new URL("https://api.twelvedata.com" + pathname);
+  Object.entries({ ...params, apikey: process.env.TWELVE_DATA_API_KEY }).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) url.searchParams.set(key, value);
+  });
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok || data.status === "error") {
+    throw new Error(data.message || "Erreur Twelve Data");
+  }
+  return data;
+}
+
+app.get("/api/market/xauusd", async (_req, res) => {
+  try {
+    const cached = marketCache.get("XAU/USD");
+    if (cached && Date.now() - cached.at < MARKET_TTL) return res.json(cached.data);
+
+    const [quote, series] = await Promise.all([
+      twelveData("/quote", { symbol: "XAU/USD" }),
+      twelveData("/time_series", { symbol: "XAU/USD", interval: "5min", outputsize: 120, order: "asc" })
+    ]);
+
+    const values = (series.values || []).map(v => ({
+      datetime: v.datetime,
+      open: marketNumber(v.open),
+      high: marketNumber(v.high),
+      low: marketNumber(v.low),
+      close: marketNumber(v.close)
+    })).filter(v => v.close !== null);
+
+    const closes = values.map(v => v.close);
+    const last = closes.at(-1);
+    const previous = closes.at(-2) ?? last;
+    const ema20 = ema(closes.slice(-80), 20);
+    const ema50 = ema(closes.slice(-100), 50);
+    const rsi14 = rsi(closes.slice(-100), 14);
+    const change = marketNumber(quote.change);
+    const percentChange = marketNumber(quote.percent_change);
+
+    let technicalBias = "NEUTRE";
+    if (last && ema20 && ema50) {
+      if (last > ema20 && ema20 > ema50) technicalBias = "HAUSSIER";
+      else if (last < ema20 && ema20 < ema50) technicalBias = "BAISSIER";
+    }
+
+    const payload = {
+      ok: true,
+      provider: "Twelve Data",
+      symbol: "XAU/USD",
+      price: marketNumber(quote.close || quote.price || last),
+      open: marketNumber(quote.open),
+      high: marketNumber(quote.high),
+      low: marketNumber(quote.low),
+      previousClose: marketNumber(quote.previous_close),
+      change,
+      percentChange,
+      datetime: quote.datetime || values.at(-1)?.datetime || new Date().toISOString(),
+      technical: {
+        ema20,
+        ema50,
+        rsi14,
+        bias: technicalBias
+      },
+      candles: values.slice(-60),
+      updatedAt: new Date().toISOString()
+    };
+
+    marketCache.set("XAU/USD", { at: Date.now(), data: payload });
+    res.json(payload);
+  } catch (error) {
+    const status = error.code === "MISSING_API_KEY" ? 503 : 502;
+    res.status(status).json({
+      ok: false,
+      error: error.code === "MISSING_API_KEY"
+        ? "TWELVE_DATA_API_KEY n'est pas configurée sur le serveur."
+        : "Impossible de récupérer XAU/USD.",
+      details: process.env.NODE_ENV === "development" ? String(error.message) : undefined
+    });
+  }
+});
+
 app.get("/api/news", async (req, res) => {
   try {
     if (!cache.at || Date.now() - cache.at > TTL) await refreshFeeds();
