@@ -230,6 +230,7 @@ function MarketAIPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [marketData, setMarketData] = useState(null);
   const [marketError, setMarketError] = useState("");
+  const [timeframe, setTimeframe] = useState("5");
 
   async function loadMarketData() {
     try {
@@ -306,8 +307,8 @@ function MarketAIPage() {
 
       <section className="market-grid-top">
         <div className="market-chart-card">
-          <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR</strong></div><div className="market-price-box"><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong><span className={marketData?.percentChange >= 0 ? "positive" : "negative"}>{marketData?.percentChange != null ? `${marketData.percentChange >= 0 ? "+" : ""}${marketData.percentChange.toFixed(2)}%` : "—"}</span><small>{marketData ? "LIVE API" : "OFFLINE"}</small></div><div className={`market-bias ${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}`}>{signal.bias}</div></div>
-          <TradingViewChart />
+          <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR · XAU/USD</strong></div><div className="market-price-box"><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong><span className={marketData?.percentChange >= 0 ? "positive" : "negative"}>{marketData?.percentChange != null ? `${marketData.percentChange >= 0 ? "+" : ""}${marketData.percentChange.toFixed(2)}%` : "—"}</span><small>{marketData ? "LIVE API" : "OFFLINE"}</small></div><div className={`market-bias ${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}`}>{signal.bias}</div></div>
+          <div className="mt5-chart-toolbar"><div className="mt5-timeframes">{[["1","M1"],["5","M5"],["15","M15"],["30","M30"],["60","H1"],["240","H4"]].map(([value,label]) => <button key={value} className={timeframe===value ? "active" : ""} onClick={()=>setTimeframe(value)}>{label}</button>)}</div><div className="mt5-tools"><span>◷</span><span>＋</span><span>−</span><span>⌖</span></div></div><TradingViewChart interval={timeframe} />
         </div>
         <aside className="market-coach-card">
           <div className="coach-top"><span>🤖 COACH MARKET AI</span><b>V1</b></div>
