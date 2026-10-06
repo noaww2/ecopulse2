@@ -233,6 +233,13 @@ function MarketAIPage() {
   const [timeframe, setTimeframe] = useState("5");
   const [chartMode, setChartMode] = useState("candles");
   const [simOrder, setSimOrder] = useState(null);
+  const [virtualBalance, setVirtualBalance] = useState(10000);
+  const [volume, setVolume] = useState(0.10);
+  const [sl, setSl] = useState(0);
+  const [tp, setTp] = useState(0);
+  const [positions, setPositions] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [accountTab, setAccountTab] = useState("positions");
 
   async function loadMarketData() {
     try {
@@ -282,6 +289,24 @@ function MarketAIPage() {
     return {score, bias};
   }, [news, marketData]);
 
+  function openSimPosition(side) {
+    const price = marketData?.price;
+    if (!price) return;
+    const id = Date.now();
+    const position = { id, side, entry: price, volume: Number(volume) || 0.10, sl: Number(sl) || 0, tp: Number(tp) || 0, openedAt: new Date().toISOString() };
+    setPositions(p => [position, ...p]);
+    setSimOrder(side);
+  }
+  function closeSimPosition(position) {
+    const price = marketData?.price || position.entry;
+    const direction = position.side === "ACHAT" ? 1 : -1;
+    const pnl = (price - position.entry) * direction * position.volume * 100;
+    setVirtualBalance(b => b + pnl);
+    setPositions(p => p.filter(x => x.id !== position.id));
+    setHistory(h => [{...position, exit: price, pnl, closedAt: new Date().toISOString()}, ...h].slice(0, 20));
+  }
+  const openPnl = positions.reduce((sum,p) => sum + ((marketData?.price || p.entry) - p.entry) * (p.side === "ACHAT" ? 1 : -1) * p.volume * 100, 0);
+  const equity = virtualBalance + openPnl;
   function askCoach(e) {
     e.preventDefault();
     const q = question.trim().toLowerCase();
@@ -310,7 +335,7 @@ function MarketAIPage() {
       <section className="market-grid-top">
         <div className="market-chart-card">
           <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR · XAU/USD</strong></div><div className="market-price-box"><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong><span className={marketData?.percentChange >= 0 ? "positive" : "negative"}>{marketData?.percentChange != null ? `${marketData.percentChange >= 0 ? "+" : ""}${marketData.percentChange.toFixed(2)}%` : "—"}</span><small>{marketData ? "LIVE API" : "OFFLINE"}</small></div><div className={`market-bias ${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}`}>{signal.bias}</div></div>
-          <div className="mt5-chart-toolbar"><div className="mt5-timeframes">{[["1","M1"],["5","M5"],["15","M15"],["30","M30"],["60","H1"],["240","H4"]].map(([value,label]) => <button key={value} className={timeframe===value ? "active" : ""} onClick={()=>setTimeframe(value)}>{label}</button>)}</div><div className="mt5-tools"><button className={chartMode==="candles"?"active-tool":""} onClick={()=>setChartMode("candles")}>◧</button><button className={chartMode==="line"?"active-tool":""} onClick={()=>setChartMode("line")}>╱</button><button onClick={()=>setChartMode("crosshair")}>⌖</button></div></div><TradingViewChart interval={timeframe} chartMode={chartMode} /><div className="mt5-order-strip"><div><span>SIMULATION</span><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong></div><button onClick={()=>setSimOrder("ACHAT")} className="sim-buy">ACHAT</button><button onClick={()=>setSimOrder("VENTE")} className="sim-sell">VENTE</button></div>{simOrder && <div className="sim-order-note">Ordre <b>{simOrder}</b> simulé uniquement · aucune transaction réelle.</div>}
+          <div className="mt5-chart-toolbar"><div className="mt5-timeframes">{[["1","M1"],["5","M5"],["15","M15"],["30","M30"],["60","H1"],["240","H4"]].map(([value,label]) => <button key={value} className={timeframe===value ? "active" : ""} onClick={()=>setTimeframe(value)}>{label}</button>)}</div><div className="mt5-tools"><button className={chartMode==="candles"?"active-tool":""} onClick={()=>setChartMode("candles")}>◧</button><button className={chartMode==="line"?"active-tool":""} onClick={()=>setChartMode("line")}>╱</button><button onClick={()=>setChartMode("crosshair")}>⌖</button></div></div><TradingViewChart interval={timeframe} chartMode={chartMode} /><div className="mt5-order-strip"><div><span>SIMULATION</span><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong></div><button onClick={()=>setSimOrder("ACHAT")} className="sim-buy">ACHAT</button><button onClick={()=>setSimOrder("VENTE")} className="sim-sell">VENTE</button></div>{simOrder && <div className="sim-order-note">Ordre <b>{simOrder}</b> simulé uniquement · aucune transaction réelle.</div>}<div className="mt5-account"><div className="mt5-account-head"><div><span>COMPTE DE DÉMO</span><strong>€ {equity.toFixed(2)}</strong></div><div className="mt5-account-stats"><span>Balance <b>€ {virtualBalance.toFixed(2)}</b></span><span>Equity <b>€ {equity.toFixed(2)}</b></span><span>P&L <b className={openPnl>=0?"pnl-positive":"pnl-negative"}>{openPnl>=0?"+":""}€ {openPnl.toFixed(2)}</b></span></div></div><div className="mt5-order-form"><label>Volume<select value={volume} onChange={e=>setVolume(e.target.value)}><option>0.01</option><option>0.10</option><option>0.50</option><option>1.00</option></select></label><label>SL<input type="number" value={sl} onChange={e=>setSl(e.target.value)} placeholder="Optionnel"/></label><label>TP<input type="number" value={tp} onChange={e=>setTp(e.target.value)} placeholder="Optionnel"/></label><button className="sim-buy" onClick={()=>openSimPosition("ACHAT")}>ACHAT</button><button className="sim-sell" onClick={()=>openSimPosition("VENTE")}>VENTE</button></div><div className="mt5-account-tabs"><button className={accountTab==="positions"?"active":""} onClick={()=>setAccountTab("positions")}>Positions ({positions.length})</button><button className={accountTab==="history"?"active":""} onClick={()=>setAccountTab("history")}>Historique ({history.length})</button></div><div className="mt5-account-list">{accountTab==="positions" ? (positions.length ? positions.map(p=><div className="mt5-position" key={p.id}><div><b className={p.side==="ACHAT"?"buy-text":"sell-text"}>{p.side} XAUUSD</b><small>{p.volume.toFixed(2)} lot · entrée {p.entry.toFixed(2)}</small></div><strong className={((marketData?.price||p.entry)-p.entry)*(p.side==="ACHAT"?1:-1)>=0?"pnl-positive":"pnl-negative"}>{(((marketData?.price||p.entry)-p.entry)*(p.side==="ACHAT"?1:-1)*p.volume*100)>=0?"+":""}€ {(((marketData?.price||p.entry)-p.entry)*(p.side==="ACHAT"?1:-1)*p.volume*100).toFixed(2)}</strong><button onClick={()=>closeSimPosition(p)}>Fermer</button></div>) : <p>Aucune position ouverte.</p>) : (history.length ? history.map(h=><div className="mt5-position" key={h.id}><div><b>{h.side} XAUUSD</b><small>{h.volume.toFixed(2)} lot · {h.entry.toFixed(2)} → {h.exit.toFixed(2)}</small></div><strong className={h.pnl>=0?"pnl-positive":"pnl-negative"}>{h.pnl>=0?"+":""}€ {h.pnl.toFixed(2)}</strong><span>Fermée</span></div>) : <p>Aucun trade simulé.</p>)}</div></div>
         </div>
         <aside className="market-coach-card">
           <div className="coach-top"><span>🤖 COACH MARKET AI</span><b>V1</b></div>
