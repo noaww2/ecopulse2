@@ -228,6 +228,20 @@ function MarketAIPage() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [marketData, setMarketData] = useState(null);
+  const [marketError, setMarketError] = useState("");
+
+  async function loadMarketData() {
+    try {
+      const r = await fetch("/api/market/xauusd");
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || "Flux marché indisponible");
+      setMarketData(data);
+      setMarketError("");
+    } catch (error) {
+      setMarketError(error.message || "Flux marché indisponible");
+    }
+  }
 
   async function loadMarketNews() {
     setRefreshing(true);
@@ -247,18 +261,23 @@ function MarketAIPage() {
   useEffect(() => {
     document.title = "Market AI — XAUUSD & marchés";
     loadMarketNews();
-    const id = setInterval(loadMarketNews, 5 * 60 * 1000);
-    return () => clearInterval(id);
+    loadMarketData();
+    const newsId = setInterval(loadMarketNews, 5 * 60 * 1000);
+    const marketId = setInterval(loadMarketData, 15 * 1000);
+    return () => { clearInterval(newsId); clearInterval(marketId); };
   }, []);
 
   const signal = useMemo(() => {
     const text = news.map(n => (n.title || "") + " " + (n.description || "")).join(" ").toLowerCase();
     const bullish = ["gold", "or", "fed", "rate cut", "taux", "safe haven", "geopolit"].filter(k => text.includes(k)).length;
     const bearish = ["strong dollar", "higher yields", "hausse des rendements", "rate hike", "taux élevé"].filter(k => text.includes(k)).length;
-    const score = Math.max(45, Math.min(85, 62 + bullish * 3 - bearish * 4));
-    const bias = score >= 65 ? "HAUSSIER" : score <= 55 ? "BAISSIER" : "NEUTRE";
+    const macro = 62 + bullish * 3 - bearish * 4;
+    const technical = marketData?.technical?.bias === "HAUSSIER" ? 8 : marketData?.technical?.bias === "BAISSIER" ? -8 : 0;
+    const rsiAdjust = marketData?.technical?.rsi14 > 70 ? -5 : marketData?.technical?.rsi14 < 30 ? 5 : 0;
+    const score = Math.max(35, Math.min(85, macro + technical + rsiAdjust));
+    const bias = marketData?.technical?.bias || (score >= 65 ? "HAUSSIER" : score <= 55 ? "BAISSIER" : "NEUTRE");
     return {score, bias};
-  }, [news]);
+  }, [news, marketData]);
 
   function askCoach(e) {
     e.preventDefault();
@@ -283,11 +302,11 @@ function MarketAIPage() {
         <p className="market-eyebrow">TERMINAL MARCHÉ · TEMPS RÉEL</p>
         <h1>Comprendre le marché<br/><em>avant d’agir.</em></h1>
         <p>Graphique XAUUSD, actualités économiques, calendrier et coaching dans un seul espace.</p>
-      </div><div className="market-live-pill"><i/> GRAPHIQUE LIVE · NEWS · MACRO</div></section>
+      </div><div className="market-live-pill"><i/> {marketData ? "API CONNECTÉE · XAU/USD" : "CONNEXION API EN COURS"}</div></section>
 
       <section className="market-grid-top">
         <div className="market-chart-card">
-          <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR</strong></div><div className={\`market-bias \${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}\`}>{signal.bias}</div></div>
+          <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR</strong></div><div className="market-price-box"><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong><span className={marketData?.percentChange >= 0 ? "positive" : "negative"}>{marketData?.percentChange != null ? \`\${marketData.percentChange >= 0 ? "+" : ""}\${marketData.percentChange.toFixed(2)}%\` : "—"}</span><small>{marketData ? "LIVE API" : "OFFLINE"}</small></div><div className={\`market-bias \${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}\`}>{signal.bias}</div></div>
           <TradingViewChart />
         </div>
         <aside className="market-coach-card">
@@ -295,7 +314,7 @@ function MarketAIPage() {
           <div className="coach-score"><strong>{signal.score}</strong><span>/ 100</span></div>
           <p className="coach-bias">Biais contextuel : <b>{signal.bias}</b></p>
           <div className="coach-bars"><div><span>Contexte macro</span><i><b style={{width: signal.score + "%"}}/></i></div><div><span>Risque événementiel</span><i><b style={{width: Math.max(25, 100 - signal.score / 2) + "%"}}/></i></div></div>
-          <div className="coach-context"><span>TECHNIQUE</span><b>M15 · H1</b><span>MACRO</span><b>NEWS + CALENDRIER</b><span>RISQUE</span><b>CONFIRMATION REQUISE</b></div><p className="coach-note">Le coach croise le contexte des news et du calendrier avec les éléments techniques affichés sur le graphique. Il sert à t’entraîner et ne constitue pas un signal garanti.</p>
+          <div className="coach-context"><span>TECHNIQUE</span><b>{marketData?.technical?.bias || "—"} · RSI {marketData?.technical?.rsi14 ? marketData.technical.rsi14.toFixed(1) : "—"}</b><span>PRIX XAU/USD</span><b>{marketData?.price ? marketData.price.toFixed(2) + " $" : "—"}</b><span>MACRO</span><b>NEWS + CALENDRIER</b><span>DONNÉES</span><b>{marketData ? "API CONNECTÉE" : "EN ATTENTE"}</b></div><p className="coach-note">Le coach croise le contexte des news et du calendrier avec les éléments techniques affichés sur le graphique. Il sert à t’entraîner et ne constitue pas un signal garanti.</p>
           <form className="coach-form" onSubmit={askCoach}><input value={question} onChange={e=>setQuestion(e.target.value)} placeholder="Pose une question au coach…"/><button>→</button></form>
           {answer && <div className="coach-answer">{answer}</div>}
         </aside>
