@@ -62,3 +62,126 @@ footer{border-top:1px solid var(--line);padding:22px 0 25px;background:#f5f5f7}.
 .mt5-account{background:#121212;color:#fff;border-top:1px solid #292929}.mt5-account-head{display:flex;justify-content:space-between;gap:12px;padding:15px 12px;border-bottom:1px solid #292929}.mt5-account-head>div:first-child{display:flex;flex-direction:column;gap:5px}.mt5-account-head span{font-size:7px;color:#888;letter-spacing:.12em;font-weight:800}.mt5-account-head strong{font-size:20px;letter-spacing:-.04em}.mt5-account-stats{display:flex;gap:15px;align-items:center}.mt5-account-stats span{font-size:7px;color:#777;display:flex;flex-direction:column;gap:3px}.mt5-account-stats b{font-size:8px;color:#ddd}.pnl-positive{color:#49c98a!important}.pnl-negative{color:#f0796e!important}.mt5-order-form{display:grid;grid-template-columns:1fr 1fr 1fr 76px 76px;gap:6px;padding:10px 12px;border-bottom:1px solid #292929}.mt5-order-form label{display:flex;flex-direction:column;gap:5px;font-size:7px;color:#888;text-transform:uppercase;font-weight:800}.mt5-order-form input,.mt5-order-form select{height:31px;border:1px solid #333;background:#202020;color:#fff;border-radius:6px;padding:0 8px;font-size:9px;outline:none}.mt5-order-form button{border:0;border-radius:6px;color:#fff;font-size:8px;font-weight:900}.mt5-account-tabs{display:flex;border-bottom:1px solid #292929}.mt5-account-tabs button{flex:1;border:0;border-bottom:2px solid transparent;background:transparent;color:#777;padding:10px;font-size:8px;font-weight:800}.mt5-account-tabs button.active{color:#fff;border-bottom-color:#fff}.mt5-account-list{max-height:180px;overflow:auto}.mt5-account-list>p{padding:16px 12px;color:#777;font-size:8px;text-align:center}.mt5-position{display:grid;grid-template-columns:1fr auto auto;gap:9px;align-items:center;padding:11px 12px;border-bottom:1px solid #242424}.mt5-position>div{display:flex;flex-direction:column;gap:4px;min-width:0}.mt5-position b{font-size:8px}.mt5-position small,.mt5-position span{font-size:7px;color:#777}.buy-text{color:#49c98a}.sell-text{color:#f0796e}.mt5-position>strong{font-size:9px}.mt5-position button{border:1px solid #444;background:#1d1d1d;color:#bbb;border-radius:5px;padding:6px 8px;font-size:7px;font-weight:800}@media(max-width:600px){.mt5-account-head{padding:12px 9px;display:block}.mt5-account-stats{justify-content:space-between;margin-top:10px;gap:7px}.mt5-order-form{grid-template-columns:1fr 1fr 1fr 1fr 1fr;padding:8px 9px}.mt5-order-form button{height:31px}.mt5-account-list{max-height:165px}.mt5-position{padding:10px 9px}.mt5-position button{padding:5px 7px}}
 
 .market-live-pill.market-open{color:#187448;border-color:#bfe4cf;background:#edf9f2}.market-live-pill.market-open i{background:#27a66d}.market-live-pill.market-closed{color:#a13a31;border-color:#efd0cc;background:#fff3f1}.market-live-pill.market-closed i{background:#d9574d}
+
+
+/* ===== ECOPULSE UI REFRESH 2026 ===== */
+:root{
+  --ink:#111214;
+  --muted:#70737a;
+  --line:#e7e8eb;
+  --surface:#ffffff;
+  --soft:#f5f6f8;
+  --blue:#2563eb;
+  --green:#16a36b;
+}
+html{scroll-behavior:smooth}
+body{background:#f7f8fa;color:var(--ink)}
+::selection{background:#111;color:#fff}
+button,a,input{transition:all .18s ease}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #2563eb;outline-offset:3px}
+
+/* Main news experience */
+.app-shell{background:linear-gradient(180deg,#fafbfc 0%,#f7f8fa 100%)}
+.topline{background:#fff;border-color:#eceef1}
+.site-header{background:rgba(255,255,255,.84);border-color:rgba(17,18,20,.07);box-shadow:0 1px 12px rgba(17,18,20,.025)}
+.brand-mark{box-shadow:0 5px 14px rgba(17,18,20,.14)}
+.nav-link{border-radius:9px;padding:8px 10px}
+.nav-link:hover,.nav-link.active{background:#f1f3f6;color:#111}
+.market-nav-cta{box-shadow:0 7px 20px rgba(17,17,17,.13)!important}
+.intro{padding-top:88px}
+.intro h1{font-weight:700}
+.hero-cta{box-shadow:0 10px 25px rgba(17,18,20,.13)}
+.hero-cta:hover{box-shadow:0 14px 32px rgba(17,18,20,.18)}
+.sport-banner{box-shadow:0 15px 35px rgba(17,18,20,.10)}
+.notice{box-shadow:0 8px 24px rgba(37,99,235,.05)}
+.lead-story,.market-placeholder,.market-chart-card,.market-coach-card,.market-news-panel,.market-calendar-panel{
+  box-shadow:0 8px 30px rgba(17,18,20,.045)
+}
+.lead-story:hover{box-shadow:0 18px 48px rgba(17,18,20,.09)}
+.lead-image{background:linear-gradient(135deg,#edf3ff,#e8eef8 52%,#f7f9fc)}
+.list-story{border-radius:14px}
+.list-story:hover{background:#fff;box-shadow:0 7px 24px rgba(17,18,20,.045);transform:translateY(-1px)}
+.filter{border-color:#e4e6ea;background:#fff}
+.filter:hover{border-color:#cfd3da;color:#111}
+.filter.active{box-shadow:0 6px 16px rgba(17,18,20,.12)}
+.refresh-btn:hover{border-color:#c9ccd2;transform:translateY(-1px);box-shadow:0 6px 16px rgba(17,18,20,.06)}
+.market-strip{background:linear-gradient(135deg,#eef2f7,#f5f6f8);border:1px solid #e5e7eb;box-shadow:0 12px 35px rgba(17,18,20,.045)}
+.newsletter{background:linear-gradient(180deg,transparent,#fafafa);border-radius:20px;padding-left:20px;padding-right:20px}
+.newsletter input:focus{box-shadow:0 0 0 4px rgba(37,99,235,.08)}
+footer{background:#111214;color:#aaa;border-top:0}
+footer .brand,footer .footer-inner .brand{color:#fff}
+footer .footer-links a{color:#bbb}
+footer .footer-links a:hover{color:#fff}
+footer .footer-note{color:#777}
+
+/* NOA STUDIO */
+.agency-page{background:#f5f5f2}
+.agency-nav{box-shadow:0 1px 15px rgba(0,0,0,.035)}
+.agency-nav-cta,.agency-primary{box-shadow:0 9px 24px rgba(0,0,0,.13)}
+.agency-nav-cta:hover,.agency-primary:hover{transform:translateY(-2px);box-shadow:0 13px 30px rgba(0,0,0,.17)}
+.agency-secondary{background:rgba(255,255,255,.55)}
+.agency-secondary:hover{background:#fff;border-color:#aaa;transform:translateY(-1px)}
+.agency-hero{background:radial-gradient(circle at 78% 20%,#fff 0,#efefe9 30%,#e7e7e0 100%)}
+.browser-card{box-shadow:0 35px 90px rgba(0,0,0,.13)}
+.agency-services article{transition:padding .2s ease,background .2s ease}
+.agency-services article:hover{background:rgba(255,255,255,.5)}
+.agency-project{box-shadow:0 15px 40px rgba(0,0,0,.12)}
+.agency-price{box-shadow:0 8px 26px rgba(0,0,0,.045);transition:transform .2s ease,box-shadow .2s ease}
+.agency-price:hover{transform:translateY(-4px);box-shadow:0 18px 42px rgba(0,0,0,.09)}
+.agency-price.featured{box-shadow:0 20px 55px rgba(0,0,0,.12)}
+.agency-contact-card{box-shadow:0 22px 55px rgba(0,0,0,.16)}
+.agency-contact-card a:hover{transform:translateY(-2px);box-shadow:0 9px 22px rgba(255,255,255,.12)}
+
+/* Chat */
+.chat-page{background:radial-gradient(circle at top,#fff 0,#f4f3ee 55%,#ecebe5 100%)}
+.chat-card,.chat-shell{box-shadow:0 30px 90px rgba(0,0,0,.11)}
+.chat-form input:hover,.chat-composer input:hover{border-color:#c8c7c1}
+.chat-form button:hover,.chat-composer button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,0,0,.15)}
+.chat-messages{background:linear-gradient(180deg,#fafaf8,#f5f5f1)}
+.chat-admin{background:linear-gradient(135deg,#f5f5f1,#ecebe5)}
+.chat-admin-grid{box-shadow:0 25px 70px rgba(0,0,0,.08)}
+
+/* Market AI premium terminal */
+.market-page{background:radial-gradient(circle at 50% -10%,#fff 0,#f6f6f3 42%,#f1f2ef 100%)}
+.market-header{box-shadow:0 1px 16px rgba(0,0,0,.035)}
+.market-hero{padding-top:82px}
+.market-live-pill{box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.market-grid-top{gap:18px}
+.market-chart-card,.market-coach-card,.market-news-panel,.market-calendar-panel{border-color:#e1e2dc;border-radius:20px}
+.market-card-head{background:rgba(250,250,248,.72)}
+.market-coach-card{background:linear-gradient(180deg,#fff,#fafaf7)}
+.coach-score strong{font-weight:700}
+.coach-form input:focus{border-color:#aaa;box-shadow:0 0 0 4px rgba(17,17,17,.05)}
+.market-panels{gap:18px}
+.market-news-list article{transition:background .18s ease}
+.market-news-list article:hover{background:#fafaf7}
+.market-watch{box-shadow:0 20px 55px rgba(0,0,0,.12)}
+.watch-items>div{transition:transform .18s ease,border-color .18s ease}
+.watch-items>div:hover{transform:translateY(-2px);border-color:#4a4a4a}
+.mt5-chart-toolbar{background:#f8f8f5}
+.mt5-timeframes button,.mt5-tools button{transition:background .15s ease,color .15s ease,transform .15s ease}
+.mt5-timeframes button:hover,.mt5-tools button:hover{transform:translateY(-1px)}
+.mt5-account{box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+.mt5-order-form button{transition:transform .15s ease,filter .15s ease}
+.mt5-order-form button:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.market-disclaimer{padding-bottom:45px}
+
+/* Better small-screen rhythm */
+@media(max-width:600px){
+  .wrap{width:calc(100% - 28px)}
+  .intro{padding-top:52px}
+  .intro h1{font-size:48px}
+  .lead-story,.market-chart-card,.market-coach-card,.market-news-panel,.market-calendar-panel{border-radius:16px}
+  .feed-section{padding-top:36px}
+  .newsletter{margin-top:5px;padding:30px 0}
+  .agency-wrap,.market-wrap{width:calc(100% - 28px)}
+  .agency-hero{padding:62px 0 55px}
+  .agency-section{padding:72px 0}
+  .agency-hero h1{font-size:47px}
+  .agency-projects{gap:10px}
+  .agency-pricing{gap:10px}
+  .market-hero{padding-top:48px}
+  .market-hero h1{font-size:49px}
+  .market-grid-top,.market-panels{gap:10px}
+  .market-watch{border-radius:16px;padding:22px 14px}
+}
