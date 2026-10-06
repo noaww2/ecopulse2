@@ -240,6 +240,7 @@ function MarketAIPage() {
   const [positions, setPositions] = useState([]);
   const [history, setHistory] = useState([]);
   const [accountTab, setAccountTab] = useState("positions");
+  const [marketOpen, setMarketOpen] = useState(false);
 
   async function loadMarketData() {
     try {
@@ -269,12 +270,23 @@ function MarketAIPage() {
   }
 
   useEffect(() => {
+    const updateMarketStatus = () => {
+      const now = new Date();
+      const day = new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", weekday:"short"}).format(now);
+      const hour = Number(new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", hour:"2-digit", hour12:false}).format(now));
+      const minute = Number(new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", minute:"2-digit"}).format(now));
+      const total = hour * 60 + minute;
+      const isWeekend = day === "Sat" || day === "Sun";
+      setMarketOpen(!isWeekend && total >= 60 && total < 1439);
+    };
+    updateMarketStatus();
+    const statusId = setInterval(updateMarketStatus, 30000);
     document.title = "Market AI — XAUUSD & marchés";
     loadMarketNews();
     loadMarketData();
     const newsId = setInterval(loadMarketNews, 5 * 60 * 1000);
     const marketId = setInterval(loadMarketData, 15 * 1000);
-    return () => { clearInterval(newsId); clearInterval(marketId); };
+    return () => { clearInterval(newsId); clearInterval(marketId); clearInterval(statusId); };
   }, []);
 
   const signal = useMemo(() => {
