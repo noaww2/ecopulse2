@@ -180,7 +180,7 @@ function App() {
 }
 
 
-function TradingViewChart({symbol="OANDA:XAUUSD", interval="1S"}) {
+function TradingViewChart({symbol="OANDA:XAUUSD", interval="1S", chartMode="candles"}) {
   const container = useRef(null);
   useEffect(() => {
     if (!container.current) return;
@@ -191,14 +191,14 @@ function TradingViewChart({symbol="OANDA:XAUUSD", interval="1S"}) {
     script.async = true;
     script.innerHTML = JSON.stringify({
       autosize: true, symbol, interval, timezone: "Europe/Paris", theme: "light",
-      style: "1", locale: "fr", allow_symbol_change: true, hide_side_toolbar: false,
+      style: chartMode === "line" ? "2" : "1", locale: "fr", allow_symbol_change: true, hide_side_toolbar: false,
       withdateranges: true, save_image: false, calendar: false,
       studies: ["RSI@tv-basicstudies", "MASimple@tv-basicstudies"],
       support_host: "https://www.tradingview.com"
     });
     container.current.appendChild(script);
     return () => { if (container.current) container.current.innerHTML = ""; };
-  }, [symbol, interval]);
+  }, [symbol, interval, chartMode]);
   return <div className="tv-chart-wrap" ref={container}><div className="tv-loading">Chargement du graphique XAUUSD…</div></div>;
 }
 
@@ -231,6 +231,8 @@ function MarketAIPage() {
   const [marketData, setMarketData] = useState(null);
   const [marketError, setMarketError] = useState("");
   const [timeframe, setTimeframe] = useState("5");
+  const [chartMode, setChartMode] = useState("candles");
+  const [simOrder, setSimOrder] = useState(null);
 
   async function loadMarketData() {
     try {
@@ -308,7 +310,7 @@ function MarketAIPage() {
       <section className="market-grid-top">
         <div className="market-chart-card">
           <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR · XAU/USD</strong></div><div className="market-price-box"><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong><span className={marketData?.percentChange >= 0 ? "positive" : "negative"}>{marketData?.percentChange != null ? `${marketData.percentChange >= 0 ? "+" : ""}${marketData.percentChange.toFixed(2)}%` : "—"}</span><small>{marketData ? "LIVE API" : "OFFLINE"}</small></div><div className={`market-bias ${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}`}>{signal.bias}</div></div>
-          <div className="mt5-chart-toolbar"><div className="mt5-timeframes">{[["1","M1"],["5","M5"],["15","M15"],["30","M30"],["60","H1"],["240","H4"]].map(([value,label]) => <button key={value} className={timeframe===value ? "active" : ""} onClick={()=>setTimeframe(value)}>{label}</button>)}</div><div className="mt5-tools"><span>◷</span><span>＋</span><span>−</span><span>⌖</span></div></div><TradingViewChart interval={timeframe} />
+          <div className="mt5-chart-toolbar"><div className="mt5-timeframes">{[["1","M1"],["5","M5"],["15","M15"],["30","M30"],["60","H1"],["240","H4"]].map(([value,label]) => <button key={value} className={timeframe===value ? "active" : ""} onClick={()=>setTimeframe(value)}>{label}</button>)}</div><div className="mt5-tools"><button className={chartMode==="candles"?"active-tool":""} onClick={()=>setChartMode("candles")}>◧</button><button className={chartMode==="line"?"active-tool":""} onClick={()=>setChartMode("line")}>╱</button><button onClick={()=>setChartMode("crosshair")}>⌖</button></div></div><TradingViewChart interval={timeframe} chartMode={chartMode} /><div className="mt5-order-strip"><div><span>SIMULATION</span><strong>{marketData?.price ? marketData.price.toFixed(2) : "—"} $</strong></div><button onClick={()=>setSimOrder("ACHAT")} className="sim-buy">ACHAT</button><button onClick={()=>setSimOrder("VENTE")} className="sim-sell">VENTE</button></div>{simOrder && <div className="sim-order-note">Ordre <b>{simOrder}</b> simulé uniquement · aucune transaction réelle.</div>}
         </div>
         <aside className="market-coach-card">
           <div className="coach-top"><span>🤖 COACH MARKET AI</span><b>V1</b></div>
