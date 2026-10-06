@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ArrowRight, ArrowUpRight, Clock3, Search, RefreshCw, TrendingUp,
@@ -95,7 +95,7 @@ function App() {
       <a className="brand" href="#"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a>
       <nav className={mobileOpen ? "nav-links open" : "nav-links"}>
         {CATEGORIES.map(c => <button key={c} className={category === c ? "nav-link active" : "nav-link"} onClick={() => {setCategory(c);setMobileOpen(false)}}>{c === "Toutes" ? "À la une" : c}</button>)}
-        <a className="nav-link nav-agency-link" href="/agence" onClick={()=>setMobileOpen(false)}>NOA STUDIO</a>
+        <a className="nav-link market-nav-link" href="/market" onClick={()=>setMobileOpen(false)}>MARKET AI</a><a className="nav-link nav-agency-link" href="/agence" onClick={()=>setMobileOpen(false)}>NOA STUDIO</a>
       </nav>
       <div className="nav-actions">
         <button className="icon-btn search-toggle" aria-label="Rechercher" onClick={()=>setSearchOpen(v=>!v)}><Search size={17}/></button>
@@ -176,6 +176,144 @@ function App() {
       </section>
     </main>
     <footer><div className="wrap footer-inner"><a className="brand" href="/"><span className="brand-mark">é.</span><span>ÉcoPulse</span></a><span>{isSport ? "Le sport, expliqué simplement." : "L’économie, expliquée simplement."}</span><div className="footer-links"><a href="/agence">NOA STUDIO</a><a href="/agence/chat">Projet / Chat</a><span>© {new Date().getFullYear()} ÉcoPulse</span></div></div><div className="wrap footer-note">Les contenus sont fournis par des sources tierces. Vérifiez les informations auprès de l’éditeur original. Les données de marché nécessitent une source financière distincte.</div></footer>
+  </div>;
+}
+
+
+function TradingViewChart({symbol="OANDA:XAUUSD", interval="15"}) {
+  const container = useRef(null);
+  useEffect(() => {
+    if (!container.current) return;
+    container.current.innerHTML = "";
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.type = "text/javascript";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      autosize: true, symbol, interval, timezone: "Europe/Paris", theme: "light",
+      style: "1", locale: "fr", allow_symbol_change: true, hide_side_toolbar: false,
+      withdateranges: true, save_image: false, calendar: false,
+      studies: ["RSI@tv-basicstudies", "MASimple@tv-basicstudies"],
+      support_host: "https://www.tradingview.com"
+    });
+    container.current.appendChild(script);
+    return () => { if (container.current) container.current.innerHTML = ""; };
+  }, [symbol, interval]);
+  return <div className="tv-chart-wrap" ref={container}><div className="tv-loading">Chargement du graphique XAUUSD…</div></div>;
+}
+
+function TradingViewCalendar() {
+  const container = useRef(null);
+  useEffect(() => {
+    if (!container.current) return;
+    container.current.innerHTML = "";
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-events.js";
+    script.type = "text/javascript";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      colorTheme: "light", isTransparent: true, locale: "fr",
+      countryFilter: "us,eu,gb,fr,de,cn,jp", importanceFilter: "-1,0,1",
+      width: "100%", height: "100%"
+    });
+    container.current.appendChild(script);
+    return () => { if (container.current) container.current.innerHTML = ""; };
+  }, []);
+  return <div className="tv-calendar-wrap" ref={container}><div className="tv-loading">Chargement du calendrier…</div></div>;
+}
+
+function MarketAIPage() {
+  const [news, setNews] = useState([]);
+  const [updated, setUpdated] = useState(null);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function loadMarketNews() {
+    setRefreshing(true);
+    try {
+      const r = await fetch("/api/news?category=Marchés&limit=16");
+      const data = await r.json();
+      setNews(data.articles || []);
+      setUpdated(data.updatedAt || new Date().toISOString());
+    } catch {
+      setNews([]);
+      setUpdated(new Date().toISOString());
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  useEffect(() => {
+    document.title = "Market AI — XAUUSD & marchés";
+    loadMarketNews();
+    const id = setInterval(loadMarketNews, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const signal = useMemo(() => {
+    const text = news.map(n => (n.title || "") + " " + (n.description || "")).join(" ").toLowerCase();
+    const bullish = ["gold", "or", "fed", "rate cut", "taux", "safe haven", "geopolit"].filter(k => text.includes(k)).length;
+    const bearish = ["strong dollar", "higher yields", "hausse des rendements", "rate hike", "taux élevé"].filter(k => text.includes(k)).length;
+    const score = Math.max(45, Math.min(85, 62 + bullish * 3 - bearish * 4));
+    const bias = score >= 65 ? "HAUSSIER" : score <= 55 ? "BAISSIER" : "NEUTRE";
+    return {score, bias};
+  }, [news]);
+
+  function askCoach(e) {
+    e.preventDefault();
+    const q = question.trim().toLowerCase();
+    if (!q) return;
+    if (q.includes("acheter") || q.includes("vendre") || q.includes("entrer")) {
+      setAnswer("Coach : ne prends pas une décision uniquement à partir d’un signal. Vérifie d’abord la tendance, la structure, la volatilité et le calendrier économique. Attends une confirmation sur ton unité de temps.");
+    } else if (q.includes("or") || q.includes("xau")) {
+      setAnswer(\`Coach : le contexte automatique actuel est \${signal.bias.toLowerCase()} avec un score de \${signal.score}/100. Utilise ce score comme contexte pédagogique, pas comme une recommandation d’achat ou de vente.\`);
+    } else {
+      setAnswer("Coach : commence par regarder XAUUSD en M15 puis H1. Identifie la tendance, les derniers sommets/creux et les événements économiques à venir avant de chercher une entrée.");
+    }
+  }
+
+  return <div className="market-page">
+    <header className="market-header"><div className="market-wrap market-nav">
+      <a className="market-brand" href="/">ÉcoPulse <span>/ MARKET AI</span></a>
+      <div className="market-nav-actions"><a href="/">Actualités</a><a className="active" href="/market">Marchés</a><a href="/#sport">Sport</a><button onClick={loadMarketNews} disabled={refreshing}>{refreshing ? "Actualisation…" : "↻ Actualiser"}</button></div>
+    </div></header>
+    <main className="market-wrap">
+      <section className="market-hero"><div>
+        <p className="market-eyebrow">TERMINAL MARCHÉ · TEMPS RÉEL</p>
+        <h1>Comprendre le marché<br/><em>avant d’agir.</em></h1>
+        <p>Graphique XAUUSD, actualités économiques, calendrier et coaching dans un seul espace.</p>
+      </div><div className="market-live-pill"><i/> DONNÉES MARCHÉ LIVE</div></section>
+
+      <section className="market-grid-top">
+        <div className="market-chart-card">
+          <div className="market-card-head"><div><span>XAUUSD</span><strong>OR / DOLLAR</strong></div><div className={\`market-bias \${signal.bias === "HAUSSIER" ? "up" : signal.bias === "BAISSIER" ? "down" : "flat"}\`}>{signal.bias}</div></div>
+          <TradingViewChart />
+        </div>
+        <aside className="market-coach-card">
+          <div className="coach-top"><span>🤖 COACH MARKET AI</span><b>V1</b></div>
+          <div className="coach-score"><strong>{signal.score}</strong><span>/ 100</span></div>
+          <p className="coach-bias">Biais contextuel : <b>{signal.bias}</b></p>
+          <div className="coach-bars"><div><span>Contexte macro</span><i><b style={{width: signal.score + "%"}}/></i></div><div><span>Risque événementiel</span><i><b style={{width: Math.max(25, 100 - signal.score / 2) + "%"}}/></i></div></div>
+          <p className="coach-note">Analyse automatique basée sur les actualités disponibles. Ce score est pédagogique et ne constitue pas un signal de trading.</p>
+          <form className="coach-form" onSubmit={askCoach}><input value={question} onChange={e=>setQuestion(e.target.value)} placeholder="Pose une question au coach…"/><button>→</button></form>
+          {answer && <div className="coach-answer">{answer}</div>}
+        </aside>
+      </section>
+
+      <section className="market-panels">
+        <div className="market-news-panel">
+          <div className="market-panel-head"><div><span>ACTUALITÉS QUI COMPTENT</span><h2>Le marché maintenant</h2></div><small>{updated ? "Mis à jour à " + new Intl.DateTimeFormat("fr-FR",{hour:"2-digit",minute:"2-digit"}).format(new Date(updated)) : "—"}</small></div>
+          <div className="market-news-list">{news.length ? news.slice(0,8).map((n,i)=><article key={n.id || i}><div className="market-news-index">0{i+1}</div><div><b>{n.title}</b><p>{n.description || "Voir la source pour le contexte complet."}</p><small>{n.source || "Source"} · {n.publishedAt ? fmtDate(n.publishedAt) : "—"}</small></div>{n.url && <a href={n.url} target="_blank" rel="noreferrer">↗</a>}</article>) : <div className="market-empty">Les actualités apparaîtront ici lorsque le flux économique sera disponible.</div>}</div>
+        </div>
+        <aside className="market-calendar-panel"><div className="market-panel-head"><div><span>MACRO</span><h2>Calendrier économique</h2></div></div><TradingViewCalendar /></aside>
+      </section>
+
+      <section className="market-watch"><div><span>WATCHLIST</span><h2>Les repères à surveiller</h2></div><div className="watch-items">
+        <div><b>XAUUSD</b><span>Or</span><strong>Graphique</strong></div><div><b>DXY</b><span>Dollar</span><strong>Contexte</strong></div><div><b>US10Y</b><span>Rendement US</span><strong>Contexte</strong></div><div><b>NAS100</b><span>Technologie US</span><strong>Risque</strong></div><div><b>WTI</b><span>Pétrole</span><strong>Inflation</strong></div>
+      </div></section>
+      <section className="market-disclaimer"><strong>Important</strong><span>Market AI est un outil d’information et d’entraînement. Il ne fournit pas de conseil financier personnalisé et ne garantit aucun résultat. Les données de marché peuvent dépendre des conditions et du fournisseur.</span></section>
+    </main>
   </div>;
 }
 
@@ -328,4 +466,4 @@ function ChatAdminPage() {
 }
 
 const root = createRoot(document.getElementById("root"));
-root.render(window.location.pathname === "/agence" ? <AgencyPage /> : window.location.pathname === "/agence/chat" ? <ChatPage /> : window.location.pathname === "/agence/messages" ? <ChatAdminPage /> : <App />);
+root.render(window.location.pathname === "/market" ? <MarketAIPage /> : window.location.pathname === "/agence" ? <AgencyPage /> : window.location.pathname === "/agence/chat" ? <ChatPage /> : window.location.pathname === "/agence/messages" ? <ChatAdminPage /> : <App />);
