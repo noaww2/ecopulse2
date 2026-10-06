@@ -286,7 +286,7 @@ function MarketAIPage() {
     if (q.includes("acheter") || q.includes("vendre") || q.includes("entrer")) {
       setAnswer("Coach : ne prends pas une décision uniquement à partir d’un signal. Vérifie d’abord la tendance, la structure, la volatilité et le calendrier économique. Attends une confirmation sur ton unité de temps.");
     } else if (q.includes("or") || q.includes("xau")) {
-      setAnswer(\`Coach : XAU/USD est à \${marketData?.price ? marketData.price.toFixed(2) : "—"} USD. Biais technique \${marketData?.technical?.bias?.toLowerCase() || "indisponible"}, RSI \${marketData?.technical?.rsi14 ? marketData.technical.rsi14.toFixed(1) : "—"}, score contextuel \${signal.score}/100. C’est un contexte pédagogique, pas une recommandation d’achat ou de vente.\`);
+      setAnswer(`Coach : XAU/USD est à ${marketData?.price ? marketData.price.toFixed(2) : "—"} USD. Biais technique ${marketData?.technical?.bias?.toLowerCase() || "indisponible"}, RSI ${marketData?.technical?.rsi14 ? marketData.technical.rsi14.toFixed(1) : "—"}, score contextuel ${signal.score}/100. C’est un contexte pédagogique, pas une recommandation d’achat ou de vente.`);
     } else {
       setAnswer("Coach : commence par regarder XAUUSD en M15 puis H1. Identifie la tendance, les derniers sommets/creux et les événements économiques à venir avant de chercher une entrée.");
     }
