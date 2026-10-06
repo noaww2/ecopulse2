@@ -272,12 +272,16 @@ function MarketAIPage() {
   useEffect(() => {
     const updateMarketStatus = () => {
       const now = new Date();
-      const day = new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", weekday:"short"}).format(now);
-      const hour = Number(new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", hour:"2-digit", hour12:false}).format(now));
-      const minute = Number(new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", minute:"2-digit"}).format(now));
-      const total = hour * 60 + minute;
-      const isWeekend = day === "Sat" || day === "Sun";
-      setMarketOpen(!isWeekend && total >= 60 && total < 1439);
+      const parts = new Intl.DateTimeFormat("en-US", {timeZone:"Europe/Paris", weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false}).formatToParts(now);
+      const get = type => parts.find(p => p.type === type)?.value;
+      const day = get("weekday");
+      const total = Number(get("hour")) * 60 + Number(get("minute"));
+      const isSunday = day === "Sun";
+      const isSaturday = day === "Sat";
+      // XAU/USD trades nearly 24h on weekdays, with a daily maintenance break.
+      // Hours can vary slightly by broker/provider; this follows the common Paris-time schedule.
+      const open = isSunday ? total >= 23 * 60 : !isSaturday && (total < 22 * 60 || total >= 23 * 60);
+      setMarketOpen(open);
     };
     updateMarketStatus();
     const statusId = setInterval(updateMarketStatus, 30000);
